@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - DPIPS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Painel Administrativo</h1>
+            <p>DPIPS - Gestão de Reservas</p>
+            <div class="user-info">
+                <span id="adminEmail"></span>
+                <button id="logoutBtn" class="btn-logout">Sair</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Estatísticas -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalReservas">0</div>
+                    <div class="stat-label">Total de Reservas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="reservasHoje">0</div>
+                    <div class="stat-label">Reservas de Hoje</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="reservasSemana">0</div>
+                    <div class="stat-label">Reservas da Semana</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="usuariosUnicos">0</div>
+                    <div class="stat-label">Usuários Únicos</div>
+                </div>
+            </section>
+
+            <!-- Filtros -->
+            <div class="filters">
+                <input type="date" id="filtroData" onchange="carregarReservas()">
+                <button onclick="carregarReservas()" class="btn-secondary">🔄 Atualizar</button>
+                <button onclick="exportarCSV()" class="btn-secondary">📊 Exportar CSV</button>
+            </div>
+
+            <!-- Tabela de Reservas -->
+            <section class="table-section">
+                <h2>📋 Todas as Reservas</h2>
+                <div id="tabelaReservas">
+                    <p class="loading">Carregando...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+        import { getFirestore, collection, getDocs, query, where, deleteDoc, doc, orderBy, Timestamp } from "firebase/firestore";
+        import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+
+        // Configuração Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmn0YA71iVXgyvb8627D-rv1ZVtkCHLF4",
+            authDomain: "agenda-dpips.firebaseapp.com",
+            projectId: "agenda-dpips",
+            storageBucket: "agenda-dpips.firebasestorage.app",
+            messagingSenderId: "10526411332",
+            appId: "1:10526411332:web:77ef3682a408448bf18a11"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Verificar autenticação
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                document.getElementById('adminEmail').textContent = `👤 ${user.email}`;
+                carregarReservas();
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await signOut(auth);
+            window.location.href = 'login.html';
+        });
+
+        // Função global para carregar reservas
+        window.carregarReservas = async function() {
+            const container = document.getElementById('tabelaReservas');
+            container.innerHTML = '<p class="loading">🔄 Carregando...</p>';
+
+            try {
+                const filtroData = document.getElementById('filtroData').value;
+                let q = collection(db, 'reservas');
+                
+                if (filtroData) {
+                    q = query(q, where('data', '==', filtroData));
+                }
+                
+                const snapshot = await getDocs(q);
+                const reservas = [];
+                snapshot.forEach(doc => {
+                    reservas.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Ordenar por data e hora
+                reservas.sort((a, b) => {
+                    if (a.data !== b.data) return a.data.localeCompare(b.data);
+                    return a.hora.localeCompare(b.hora);
+                });
+
+                // Atualizar estatísticas
+                atualizarEstatisticas(reservas);
+
+                if (reservas.length === 0) {
+                    container.innerHTML = '<p class="empty">📭 Nenhuma reserva encontrada</p>';
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Data</th>
+                                <th>Hora</th>
+                                <th>Setor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                reservas.forEach(r => {
+                    html += `
+                        <tr>
+                            <td>#${r.id.slice(0, 6)}</td>
+                            <td><strong>${r.nome}</strong></td>
+                            <td>${formatarData(r.data)}</td>
+                            <td>${r.hora}</td>
+                            <td>${r.setor}</td>
+                            <td>
+                                <button class="btn-delete" onclick="deletarReserva('${r.id}')">🗑️ Excluir</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Erro:', error);
+                container.innerHTML = `<p class="error">❌ Erro ao carregar: ${error.message}</p>`;
+            }
+        };
+
+        // Função global para deletar reserva
+        window.deletarReserva = async function(id) {
+            if (!confirm(`⚠️ Tem certeza que deseja excluir esta reserva?`)) return;
+
+            try {
+                await deleteDoc(doc(db, 'reservas', id));
+                alert('🗑️ Reserva excluída com sucesso!');
+                carregarReservas();
+            } catch (error) {
+                alert('❌ Erro ao excluir: ' + error.message);
+            }
+        };
+
+        // Função global para exportar CSV
+        window.exportarCSV = async function() {
+            try {
+                const snapshot = await getDocs(collection(db, 'reservas'));
+                const reservas = [];
+                snapshot.forEach(doc => {
+                    reservas.push(doc.data());
+                });
+
+                let csv = 'Nome,Data,Hora,Setor\n';
+                reservas.forEach(r => {
+                    csv += `${r.nome},${r.data},${r.hora},${r.setor}\n`;
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'reservas-dpips.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                alert('❌ Erro ao exportar: ' + error.message);
+            }
+        };
+
+        // Atualizar estatísticas
+        function atualizarEstatisticas(reservas) {
+            const hoje = new Date().toISOString().split('T')[0];
+            const semana = new Date();
+            semana.setDate(semana.getDate() - 7);
+            const semanaStr = semana.toISOString().split('T')[0];
+
+            document.getElementById('totalReservas').textContent = reservas.length;
+            document.getElementById('reservasHoje').textContent = reservas.filter(r => r.data === hoje).length;
+            document.getElementById('reservasSemana').textContent = reservas.filter(r => r.data >= semanaStr).length;
+            
+            const usuarios = new Set(reservas.map(r => r.nome));
+            document.getElementById('usuariosUnicos').textContent = usuarios.size;
+        }
+
+        function formatarData(data) {
+            const partes = data.split('-');
+            return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+    </script>
+</body>
+</html>

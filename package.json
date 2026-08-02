@@ -1,0 +1,17 @@
+{
+  "name": "dpips-reservas",
+  "version": "1.0.0",
+  "description": "Sistema de reservas da DPIPS",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "deploy": "netlify deploy --prod"
+  },
+  "dependencies": {
+    "firebase": "^10.7.1",
+    "emailjs-com": "^3.2.0"
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}

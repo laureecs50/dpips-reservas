@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPIPS - Sala de Reservas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ==========================================================
+           RESET E BASE
+           ========================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f4f7fc;
+            color: #1e2a3a;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ==========================================================
+           HEADER
+           ========================================================== */
+        header {
+            background: linear-gradient(135deg, #0b2a4a, #1a4b6d);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .logo .subtitle {
+            font-size: 0.75rem;
+            font-weight: 300;
+            color: #7fc1e6;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: white;
+        }
+
+        .nav-menu ul {
+            display: flex;
+            list-style: none;
+            gap: 1.8rem;
+            align-items: center;
+        }
+
+        .nav-menu ul li a {
+            font-weight: 500;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-menu ul li a:hover {
+            border-bottom-color: #7fc1e6;
+        }
+
+        .nav-menu ul li a i {
+            margin-right: 6px;
+        }
+
+        .btn-admin {
+            background: #ffb347;
+            color: #1e2a3a;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-admin:hover {
+            background: #ffa726;
+            transform: scale(1.05);
+        }
+
+        /* ==========================================================
+           HERO
+           ========================================================== */
+        .hero {
+            background: linear-gradient(135deg, #1a4b6d, #2a6f96);
+            color: white;
+            padding: 50px 0;
+            text-align: center;
+            border-radius: 0 0 40px 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .hero h2 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto 20px;
+        }
+
+        .hero .btn-reserva-destaque {
+            background: #ffb347;
+            color: #1e2a3a;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 6px 14px rgba(255, 179, 71, 0.4);
+        }
+
+        .hero .btn-reserva-destaque:hover {
+            transform: scale(1.05);
+            background: #ffa726;
+        }
+
+        /* ==========================================================
+           AGENDA
+           ========================================================== */
+        .agenda-section {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            margin-bottom: 50px;
+        }
+
+        .agenda-section h3 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .agenda-section h3 i {
+            color: #1a4b6d;
+        }
+
+        .agenda-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .calendario {
+            background: #f9fbfd;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .calendario h4 {
+            margin-bottom: 15px;
+            color: #1a4b6d;
+        }
+
+        .calendario input[type="date"] {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #ccd7e6;
+            width: 100%;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .horarios-disponiveis {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .horario-btn {
+            background: #eef3f9;
+            border: 1px solid #ccd7e6;
+            padding: 8px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .horario-btn:hover:not(.indisponivel) {
+            background: #d0e2f5;
+            border-color: #1a4b6d;
+        }
+
+        .horario-btn.selecionado {
+            background: #1a4b6d;
+            color: white;
+            border-color: #1a4b6d;
+        }
+
+        .horario-btn.indisponivel {
+            background: #e2e8f0;
+            color: #a0aec0;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-reservar {
+            background: #1a4b6d;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .btn-reservar:hover {
+            background: #0b2a4a;
+            transform: scale(1.02);
+        }
+
+        .btn-reservar:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .lista-reservas {
+            background: #f9fbfd;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .lista-reservas h4 {
+            margin-bottom: 15px;
+            color: #1a4b6d;
+        }
+
+        .lista-reservas ul {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .lista-reservas ul li {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 5px solid #1a4b6d;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lista-reservas ul li .badge {
+            background: #e2e8f0;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .sem-reservas {
+            color: #718096;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        /* ==========================================================
+           ATALHOS
+           ========================================================== */
+        .atalhos-section {
+            margin-bottom: 50px;
+        }
+
+        .atalhos-section h3 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .atalhos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 18px;
+        }
+
+        .card-atalho {
+            background: white;
+            padding: 20px 15px;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: 0.3s;
+            cursor: pointer;
+            border: 1px solid #edf2f7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-atalho:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+            border-color: #b0cce0;
+        }
+
+        .card-atalho i {
+            font-size: 2.2rem;
+            color: #1a4b6d;
+        }
+
+        .card-atalho span {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e2a3a;
+        }
+
+        .card-atalho.whatsapp i {
+            color: #25d366;
+        }
+
+        /* ==========================================================
+           NOTÍCIAS
+           ========================================================== */
+        .noticias-section {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            margin-bottom: 50px;
+        }
+
+        .noticias-section h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .noticias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .noticia-item {
+            background: #f9fbfd;
+            padding: 18px;
+            border-radius: 16px;
+            border-left: 4px solid #1a4b6d;
+        }
+
+        .noticia-item h4 {
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+        }
+
+        .noticia-item p {
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .noticia-item .data {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        /* ==========================================================
+           RODAPÉ
+           ========================================================== */
+        footer {
+            background: #0b2a4a;
+            color: #b0cce0;
+            padding: 40px 0 20px;
+            border-radius: 40px 40px 0 0;
+            margin-top: 30px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-grid h5 {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+
+        .footer-grid ul {
+            list-style: none;
+        }
+
+        .footer-grid ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-grid ul li a {
+            color: #b0cce0;
+            transition: 0.3s;
+        }
+
+        .footer-grid ul li a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #1f4b6b;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* ==========================================================
+           MODAL RESERVA
+           ========================================================== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            max-width: 480px;
+            width: 90%;
+            padding: 30px;
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalFade 0.3s ease;
+        }
+
+        @keyframes modalFade {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-box h3 {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-box .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .modal-box label {
+            display: block;
+            margin: 12px 0 4px;
+            font-weight: 500;
+        }
+
+        .modal-box input, .modal-box textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid #ccd7e6;
+            font-size: 1rem;
+        }
+
+        .modal-box textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-box .btn-confirmar {
+            background: #1a4b6d;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .modal-box .btn-confirmar:hover {
+            background: #0b2a4a;
+        }
+
+        .modal-box .btn-confirmar:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ==========================================================
+           TOAST
+           ========================================================== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1a4b6d;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background: #2e7d32;
+        }
+
+        .toast.error {
+            background: #c62828;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* ==========================================================
+           SPINNER
+           ========================================================== */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #1a4b6d;
+            animation: spin 0.8s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==========================================================
+           RESPONSIVO
+           ========================================================== */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                padding-top: 15px;
+            }
+
+            .nav-menu.open {
+                display: block;
+            }
+
+            .nav-menu ul {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .nav-menu ul li {
+                width: 100%;
+            }
+
+            .nav-menu ul li a {
+                display: block;
+                padding: 10px 0;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .agenda-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .atalhos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h2 {
+                font-size: 1.6rem;
+            }
+            .hero .btn-reserva-destaque {
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+            .modal-box {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================================
+    HEADER
+    ========================================================== -->
+    <header>
+        <div class="container header-flex">
+            <div class="logo">
+                <h1>DPIPS <span>| Sala de Reservas</span></h1>
+                <span class="subtitle">Diretoria de Políticas Intersetoriais e Promoção à Saúde</span>
+            </div>
+            <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav class="nav-menu" id="navMenu">
+                <ul>
+                    <li><a href="#agenda"><i class="fas fa-calendar-check"></i> Agenda</a></li>
+                    <li><a href="#atalhos"><i class="fas fa-th-large"></i> Atalhos</a></li>
+                    <li><a href="#noticias"><i class="fas fa-newspaper"></i> Notícias</a></li>
+                    <li><a href="#footer"><i class="fas fa-info-circle"></i> Sobre</a></li>
+                    <li><a href="admin.html" class="btn-admin"><i class="fas fa-user-shield"></i> Admin</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ==========================================================
+    HERO
+    ========================================================== -->
+    <section class="hero">
+        <div class="container">
+            <h2>Reserve a Sala DPIPS</h2>
+            <p>Espaço colaborativo para reuniões, treinamentos e eventos. Agende seu horário com facilidade.</p>
+            <button class="btn-reserva-destaque" id="heroReservarBtn">
+                <i class="fas fa-clock"></i> Reservar agora
+            </button>
+        </div>
+    </section>
+
+    <!-- ==========================================================
+    AGENDA
+    ========================================================== -->
+    <section class="container" id="agenda">
+        <div class="agenda-section">
+            <h3><i class="fas fa-calendar-alt"></i> Agenda de Reservas</h3>
+            <div class="agenda-grid">
+                <!-- Calendário e horários -->
+                <div class="calendario">
+                    <h4><i class="fas fa-calendar-day"></i> Selecione data e horário</h4>
+                    <input type="date" id="dataReserva">
+                    <div class="horarios-disponiveis" id="horariosContainer">
+                        <button class="horario-btn" data-horario="08:00">08:00</button>
+                        <button class="horario-btn" data-horario="09:00">09:00</button>
+                        <button class="horario-btn" data-horario="10:00">10:00</button>
+                        <button class="horario-btn" data-horario="11:00">11:00</button>
+                        <button class="horario-btn" data-horario="13:00">13:00</button>
+                        <button class="horario-btn" data-horario="14:00">14:00</button>
+                        <button class="horario-btn" data-horario="15:00">15:00</button>
+                        <button class="horario-btn" data-horario="16:00">16:00</button>
+                        <button class="horario-btn" data-horario="17:00">17:00</button>
+                    </div>
+                    <button class="btn-reservar" id="btnReservarAgenda">
+                        <i class="fas fa-check-circle"></i> Reservar sala
+                    </button>
+                </div>
+
+                <!-- Lista de reservas -->
+                <div class="lista-reservas">
+                    <h4><i class="fas fa-list-ul"></i> Reservas confirmadas</h4>
+                    <div id="loadingReservas" style="text-align:center;padding:20px;">
+                        <div class="spinner"></div>
+                        <p style="margin-top:10px;color:#718096;">Carregando reservas...</p>
+                    </div>
+                    <ul id="listaReservasUl">
+                        <li class="sem-reservas">Nenhuma reserva para esta data.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================
+    ATALHOS
+    ========================================================== -->
+    <section class="container" id="atalhos">
+        <div class="atalhos-section">
+            <h3><i class="fas fa-th-large"></i> Acesse rapidamente</h3>
+            <div class="atalhos-grid">
+                <div class="card-atalho" data-alerta="Adesão dos municípios ao RN mais saudável">
+                    <i class="fas fa-handshake"></i>
+                    <span>Adesão RN + Saudável</span>
+                </div>
+                <div class="card-atalho" data-alerta="Sessão de fotos e vídeos">
+                    <i class="fas fa-photo-video"></i>
+                    <span>Fotos e Vídeos</span>
+                </div>
+                <div class="card-atalho" data-alerta="Seminários">
+                    <i class="fas fa-users"></i>
+                    <span>Seminários</span>
+                </div>
+                <div class="card-atalho" data-alerta="Publicações">
+                    <i class="fas fa-book-open"></i>
+                    <span>Publicações</span>
+                </div>
+                <div class="card-atalho" data-alerta="Fale conosco">
+                    <i class="fas fa-envelope"></i>
+                    <span>Fale conosco</span>
+                </div>
+                <div class="card-atalho" data-alerta="Deixe seu recado">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>Deixe seu recado</span>
+                </div>
+                <div class="card-atalho whatsapp" data-link="https://wa.me/558432322578?text=Olá!%20Quero%20informações%20sobre%20a%20sala%20DPIPS.">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>WhatsApp direto</span>
+                </div>
+                <div class="card-atalho" data-alerta="Notícias">
+                    <i class="fas fa-newspaper"></i>
+                    <span>Notícias</span>
+                </div>
+                <div class="card-atalho" data-alerta="Populações">
+                    <i class="fas fa-users"></i>
+                    <span>Populações</span>
+                </div>
+                <div class="card-atalho" data-alerta="Comitês">
+                    <i class="fas fa-people-arrows"></i>
+                    <span>Comitês</span>
+                </div>
+                <div class="card-atalho" data-alerta="Grupos Técnicos">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Grupos Técnicos</span>
+                </div>
+                <div class="card-atalho" data-alerta="Quem somos">
+                    <i class="fas fa-address-card"></i>
+                    <span>Quem somos</span>
+                </div>
+                <div class="card-atalho" data-alerta="Sobre a DPIPS">
+                    <i class="fas fa-building"></i>
+                    <span>Sobre a DPIPS</span>
+                </div>
+                <div class="card-atalho" data-alerta="Sobre o RN mais saudável">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>RN + Saudável</span>
+                </div>
+                <div class="card-atalho" data-alerta="PVT">
+                    <i class="fas fa-chart-line"></i>
+                    <span>PVT</span>
+                </div>
+                <div class="card-atalho" data-alerta="Eixos">
+                    <i class="fas fa-arrows-alt-h"></i>
+                    <span>Eixos</span>
+                </div>
+                <div class="card-atalho" data-alerta="Outros">
+                    <i class="fas fa-ellipsis-h"></i>
+                    <span>Outros</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================
+    NOTÍCIAS
+    ========================================================== -->
+    <section class="container" id="noticias">
+        <div class="noticias-section">
+            <h3><i class="fas fa-newspaper"></i> Notícias</h3>
+            <div class="noticias-grid" id="noticiasContainer">
+                <div class="noticia-item">
+                    <h4>Novo sistema de reservas online</h4>
+                    <p>Agora você pode reservar a sala DPIPS de forma rápida e transparente pelo nosso web app.</p>
+                    <span class="data">01/08/2026</span>
+                </div>
+                <div class="noticia-item">
+                    <h4>Adesão de novos municípios ao RN + Saudável</h4>
+                    <p>Mais 10 cidades aderiram ao programa, ampliando o alcance das ações de saúde.</p>
+                    <span class="data">28/07/2026</span>
+                </div>
+                <div class="noticia-item">
+                    <h4>Seminário de boas práticas em saúde</h4>
+                    <p>Evento reunirá gestores e técnicos para compartilhar experiências bem-sucedidas.</p>
+                    <span class="data">20/07/2026</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================
+    RODAPÉ
+    ========================================================== -->
+    <footer id="footer">
+        <div class="container footer-grid">
+            <div>
+                <h5>DPIPS</h5>
+                <p style="color:#b0cce0; font-size:0.85rem;">Diretoria de Políticas Intersetoriais e Promoção à Saúde</p>
+                <p style="color:#7fc1e6; font-size:0.8rem; margin-top:5px;">Sala de Reservas</p>
+            </div>
+            <div>
+                <h5>Links úteis</h5>
+                <ul>
+                    <li><a href="#agenda">Agenda</a></li>
+                    <li><a href="#atalhos">Atalhos</a></li>
+                    <li><a href="#noticias">Notícias</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5>Contato</h5>
+                <ul>
+                    <li><i class="fas fa-phone"></i> (84) 3232-2579</li>
+                    <li><i class="fab fa-whatsapp"></i> (84) 3232-2578</li>
+                    <li><i class="fas fa-envelope"></i> dpips.dpips@gmail.com</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 DPIPS - Diretoria de Políticas Intersetoriais e Promoção à Saúde - Todos os direitos reservados.
+        </div>
+    </footer>
+
+    <!-- ==========================================================
+    MODAL RESERVA
+    ========================================================== -->
+    <div class="modal-overlay" id="modalReserva">
+        <div class="modal-box">
+            <h3>
+                <span><i class="fas fa-pencil-alt"></i> Reservar sala</span>
+                <button class="close-modal" id="fecharModal">&times;</button>
+            </h3>
+            <form id="formReserva">
+                <label for="nomeReserva">Seu nome *</label>
+                <input type="text" id="nomeReserva" placeholder="Digite seu nome" required>
+
+                <label for="emailReserva">E-mail *</label>
+                <input type="email" id="emailReserva" placeholder="seu@email.com" required>
+
+                <label for="setorReserva">Setor/Departamento</label>
+                <input type="text" id="setorReserva" placeholder="Ex: DPIPS, SESAP, etc.">
+
+                <label for="obsReserva">Observações (opcional)</label>
+                <textarea id="obsReserva" placeholder="Motivo da reserva, participantes, etc."></textarea>
+
+                <button type="submit" class="btn-confirmar" id="btnConfirmarReserva">
+                    <i class="fas fa-check"></i> Confirmar reserva
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================================
+    TOAST
+    ========================================================== -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ==========================================================
+    JAVASCRIPT - FIREBASE + EMAILJS
+    ========================================================== -->
+    <script type="module">
+        // ==========================================================
+        // IMPORTAÇÕES
+        // ==========================================================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            query, 
+            where,
+            addDoc,
+            orderBy,
+            serverTimestamp,
+            onSnapshot
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+
+        // ==========================================================
+        // CONFIGURAÇÕES
+        // ==========================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmn0YA71iVXgyvb8627D-rv1ZVtkCHLF4",
+            authDomain: "agenda-dpips.firebaseapp.com",
+            projectId: "agenda-dpips",
+            storageBucket: "agenda-dpips.firebasestorage.app",
+            messagingSenderId: "10526411332",
+            appId: "1:10526411332:web:77ef3682a408448bf18a11"
+        };
+
+        const EMAILJS_CONFIG = {
+            publicKey: "fxOU5uT6rvEVC0xwMZK7I",
+            serviceID: "service_elz4t6e",
+            templateID: "template_l7ibsfc",
+            toEmail: "dpips.dpips@gmail.com"
+        };
+
+        // ==========================================================
+        // INICIALIZAÇÕES
+        // ==========================================================
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        emailjs.init(EMAILJS_CONFIG.publicKey);
+
+        // ==========================================================
+        // DOM REFS
+        // ==========================================================
+        const dataReservaInput = document.getElementById('dataReserva');
+        const horarioBtns = document.querySelectorAll('.horario-btn');
+        const listaReservasUl = document.getElementById('listaReservasUl');
+        const loadingReservas = document.getElementById('loadingReservas');
+        const btnReservarAgenda = document.getElementById('btnReservarAgenda');
+        const modal = document.getElementById('modalReserva');
+        const fecharModal = document.getElementById('fecharModal');
+        const formReserva = document.getElementById('formReserva');
+        const heroReservarBtn = document.getElementById('heroReservarBtn');
+        const toast = document.getElementById('toast');
+        const btnConfirmarReserva = document.getElementById('btnConfirmarReserva');
+        const menuToggle = document.getElementById('menuToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        let horarioSelecionado = null;
+        let reservasDoDia = [];
+
+        // ==========================================================
+        // MENU MOBILE
+        // ==========================================================
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('open');
+        });
+
+        // ==========================================================
+        // TOAST
+        // ==========================================================
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        // ==========================================================
+        // DATA DEFAULT
+        // ==========================================================
+        function setDefaultDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            dataReservaInput.value = `${year}-${month}-${day}`;
+        }
+        setDefaultDate();
+
+        // ==========================================================
+        // CARREGAR RESERVAS DO DIA (TEMPO REAL)
+        // ==========================================================
+        function carregarReservas() {
+            const dataSelecionada = dataReservaInput.value;
+            if (!dataSelecionada) return;
+
+            loadingReservas.style.display = 'block';
+            listaReservasUl.innerHTML = '';
+
+            const q = query(
+                collection(db, "reservas"),
+                where("data", "==", dataSelecionada),
+                orderBy("hora", "asc")
+            );
+
+            onSnapshot(q, (snapshot) => {
+                loadingReservas.style.display = 'none';
+                reservasDoDia = [];
+                listaReservasUl.innerHTML = '';
+
+                if (snapshot.empty) {
+                    listaReservasUl.innerHTML = '<li class="sem-reservas">Nenhuma reserva para esta data.</li>';
+                    atualizarHorariosDisponiveis();
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const r = { id: doc.id, ...doc.data() };
+                    reservasDoDia.push(r);
+                    
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span><strong>${r.nome || 'Anônimo'}</strong> - ${r.hora}</span>
+                        <span class="badge">${r.setor || 'Sem setor'}</span>
+                    `;
+                    listaReservasUl.appendChild(li);
+                });
+
+                atualizarHorariosDisponiveis();
+            }, (error) => {
+                console.error("Erro:", error);
+                loadingReservas.style.display = 'none';
+                listaReservasUl.innerHTML = '<li class="sem-reservas" style="color:red;">Erro ao carregar reservas.</li>';
+                showToast('Erro ao carregar reservas', 'error');
+            });
+        }
+
+        // ==========================================================
+        // ATUALIZAR HORÁRIOS
+        // ==========================================================
+        function atualizarHorariosDisponiveis() {
+            const horariosOcupados = reservasDoDia.map(r => r.hora);
+            
+            horarioBtns.forEach(btn => {
+                const horario = btn.dataset.horario;
+                if (horariosOcupados.includes(horario)) {
+                    btn.classList.add('indisponivel');
+                    btn.classList.remove('selecionado');
+                } else {
+                    btn.classList.remove('indisponivel');
+                }
+            });
+
+            if (horarioSelecionado && horariosOcupados.includes(horarioSelecionado)) {
+                horarioBtns.forEach(b => b.classList.remove('selecionado'));
+                horarioSelecionado = null;
+            }
+        }
+
+        // ==========================================================
+        // SALVAR RESERVA
+        // ==========================================================
+        async function salvarReserva(dados) {
+            try {
+                const docRef = await addDoc(collection(db, "reservas"), {
+                    nome: dados.nome,
+                    email: dados.email,
+                    setor: dados.setor || '',
+                    obs: dados.obs || '',
+                    data: dados.data,
+                    hora: dados.hora,
+                    criadoEm: serverTimestamp()
+                });
+                return { success: true, id: docRef.id };
+            } catch (error) {
+                console.error("Erro:", error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // ==========================================================
+        // ENVIAR EMAIL
+        // ==========================================================
+        async function enviarEmail(dados) {
+            try {
+                const templateParams = {
+                    to_email: EMAILJS_CONFIG.toEmail,
+                    from_name: dados.nome,
+                    from_email: dados.email,
+                    date: dados.data,
+                    time: dados.hora,
+                    setor: dados.setor || 'Não informado',
+                    obs: dados.obs || 'Sem observações',
+                    subject: `Nova reserva - Sala DPIPS - ${dados.data} às ${dados.hora}`
+                };
+
+                const response = await emailjs.send(
+                    EMAILJS_CONFIG.serviceID,
+                    EMAILJS_CONFIG.templateID,
+                    templateParams
+                );
+
+                console.log("Email enviado:", response);
+                return { success: true };
+            } catch (error) {
+                console.error("Erro email:", error);
+                return { success: false, error: error.text || error.message };
+            }
+        }
+
+        // ==========================================================
+        // EVENTOS HORÁRIOS
+        // ==========================================================
+        horarioBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('indisponivel')) {
+                    showToast('Este horário já está reservado!', 'error');
+                    return;
+                }
+                horarioBtns.forEach(b => b.classList.remove('selecionado'));
+                btn.classList.add('selecionado');
+                horarioSelecionado = btn.dataset.horario;
+            });
+        });
+
+        // ==========================================================
+        // ABRIR MODAL RESERVA
+        // ==========================================================
+        function abrirModalReserva() {
+            if (!horarioSelecionado) {
+                showToast('Selecione um horário primeiro!', 'error');
+                return;
+            }
+            
+            if (reservasDoDia.some(r => r.hora === horarioSelecionado)) {
+                showToast('Este horário foi reservado! Escolha outro.', 'error');
+                return;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        btnReservarAgenda.addEventListener('click', abrirModalReserva);
+        heroReservarBtn.addEventListener('click', () => {
+            document.getElementById('agenda').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(abrirModalReserva, 500);
+        });
+
+        fecharModal.addEventListener('click', () => modal.classList.remove('active'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+
+        // ==========================================================
+        // SUBMETER RESERVA
+        // ==========================================================
+        formReserva.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nome = document.getElementById('nomeReserva').value.trim();
+            const email = document.getElementById('emailReserva').value.trim();
+            const setor = document.getElementById('setorReserva').value.trim();
+            const obs = document.getElementById('obsReserva').value.trim();
+
+            if (!nome || !email) {
+                showToast('Preencha nome e email!', 'error');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                showToast('Email inválido!', 'error');
+                return;
+            }
+
+            const dados = {
+                nome,
+                email,
+                setor,
+                obs,
+                data: dataReservaInput.value,
+                hora: horarioSelecionado
+            };
+
+            btnConfirmarReserva.disabled = true;
+            btnConfirmarReserva.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+            try {
+                const result = await salvarReserva(dados);
+                
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                const emailResult = await enviarEmail(dados);
+                
+                if (!emailResult.success) {
+                    showToast('✅ Reserva salva! Falha no email: ' + emailResult.error, 'error');
+                } else {
+                    showToast('✅ Reserva confirmada! Email enviado.', 'success');
+                }
+
+                formReserva.reset();
+                modal.classList.remove('active');
+                
+                horarioBtns.forEach(b => b.classList.remove('selecionado'));
+                horarioSelecionado = null;
+                
+                // A lista atualiza automaticamente via onSnapshot
+
+            } catch (error) {
+                console.error("Erro:", error);
+                showToast('❌ Erro ao fazer reserva: ' + error.message, 'error');
+            } finally {
+                btnConfirmarReserva.disabled = false;
+                btnConfirmarReserva.innerHTML = '<i class="fas fa-check"></i> Confirmar reserva';
+            }
+        });
+
+        // ==========================================================
+        // CARDS DE ATALHO
+        // ==========================================================
+        document.querySelectorAll('.card-atalho').forEach(card => {
+            card.addEventListener('click', function() {
+                const link = this.dataset.link;
+                if (link) {
+                    window.open(link, '_blank');
+                } else {
+                    const alerta = this.dataset.alerta || 'Funcionalidade em desenvolvimento.';
+                    showToast(`🔔 ${alerta}`, 'success');
+                }
+            });
+        });
+
+        // ==========================================================
+        // INICIAR
+        // ==========================================================
+        dataReservaInput.addEventListener('change', carregarReservas);
+        carregarReservas();
+        
+        console.log('✅ DPIPS - Sistema de Reservas carregado!');
+        console.log('📧 EmailJS:', EMAILJS_CONFIG.publicKey ? '✅ Configurado' : '❌');
+        console.log('🔥 Firebase:', firebaseConfig.projectId);
+    </script>
+
+</body>
+</html>

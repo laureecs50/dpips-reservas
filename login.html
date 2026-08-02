@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DPIPS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1>🔐 DPIPS</h1>
+            <p>Painel Administrativo</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="loginEmail" value="dpips.dpips@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="loginSenha" value="dpips2024" required>
+                </div>
+                <button type="submit" class="btn-primary">Entrar</button>
+            </form>
+            
+            <p class="error-msg" id="errorMsg"></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+        import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmn0YA71iVXgyvb8627D-rv1ZVtkCHLF4",
+            authDomain: "agenda-dpips.firebaseapp.com",
+            projectId: "agenda-dpips",
+            storageBucket: "agenda-dpips.firebasestorage.app",
+            messagingSenderId: "10526411332",
+            appId: "1:10526411332:web:77ef3682a408448bf18a11"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const senha = document.getElementById('loginSenha').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            try {
+                await signInWithEmailAndPassword(auth, email, senha);
+                window.location.href = 'admin.html';
+            } catch (error) {
+                errorMsg.textContent = '❌ ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
