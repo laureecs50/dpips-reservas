@@ -923,7 +923,7 @@
     <div id="toast" class="toast"></div>
 
     <!-- ==========================================================
-    JAVASCRIPT - FIREBASE + EMAILJS
+    JAVASCRIPT - FIREBASE + NODEMAILER + WHATSAPP
     ========================================================== -->
     <script type="module">
         // ==========================================================
@@ -940,7 +940,6 @@
             serverTimestamp,
             onSnapshot
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
 
         // ==========================================================
         // CONFIGURAÇÕES
@@ -954,19 +953,11 @@
             appId: "1:10526411332:web:77ef3682a408448bf18a11"
         };
 
-        const EMAILJS_CONFIG = {
-            publicKey: "fxOU5uT6rvEVC0xwMZK7I",
-            serviceID: "service_elz4t6e",
-            templateID: "template_l7ibsfc",
-            toEmail: "dpips.dpips@gmail.com"
-        };
-
         // ==========================================================
         // INICIALIZAÇÕES
         // ==========================================================
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        emailjs.init(EMAILJS_CONFIG.publicKey);
 
         // ==========================================================
         // DOM REFS
@@ -1089,10 +1080,11 @@
         }
 
         // ==========================================================
-        // SALVAR RESERVA
+        // SALVAR RESERVA NO FIRESTORE
         // ==========================================================
         async function salvarReserva(dados) {
             try {
+                console.log("📤 Tentando salvar reserva:", dados);
                 const docRef = await addDoc(collection(db, "reservas"), {
                     nome: dados.nome,
                     email: dados.email,
@@ -1102,40 +1094,87 @@
                     hora: dados.hora,
                     criadoEm: serverTimestamp()
                 });
+                console.log("✅ Reserva salva com ID:", docRef.id);
                 return { success: true, id: docRef.id };
             } catch (error) {
-                console.error("Erro:", error);
+                console.error("❌ Erro detalhado:", error);
                 return { success: false, error: error.message };
             }
         }
 
         // ==========================================================
-        // ENVIAR EMAIL
+        // ENVIAR EMAIL (NODEMAILER COM GMAIL)
         // ==========================================================
         async function enviarEmail(dados) {
             try {
-                const templateParams = {
-                    to_email: EMAILJS_CONFIG.toEmail,
-                    from_name: dados.nome,
-                    from_email: dados.email,
-                    date: dados.data,
-                    time: dados.hora,
-                    setor: dados.setor || 'Não informado',
-                    obs: dados.obs || 'Sem observações',
-                    subject: `Nova reserva - Sala DPIPS - ${dados.data} às ${dados.hora}`
+                // Carrega o nodemailer via CDN
+                const nodemailerModule = await import('https://cdn.jsdelivr.net/npm/nodemailer@6.9.7/+esm');
+                
+                // Sua senha de app do Gmail (sem espaços)
+                const SENHA_APP_GMAIL = 'iisl iaef csut ejnh'.replace(/\s/g, ''); // Remove espaços automaticamente
+                
+                const transporter = nodemailerModule.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: 'dpips.dpips@gmail.com',
+                        pass: SENHA_APP_GMAIL
+                    }
+                });
+
+                const mailOptions = {
+                    from: 'dpips.dpips@gmail.com',
+                    to: 'dpips.dpips@gmail.com',
+                    subject: `Nova reserva - Sala DPIPS - ${dados.data} às ${dados.hora}`,
+                    text: `
+                        Nova reserva da sala DPIPS!
+                        
+                        Nome: ${dados.nome}
+                        Email: ${dados.email}
+                        Setor: ${dados.setor || 'Não informado'}
+                        Data: ${dados.data}
+                        Hora: ${dados.hora}
+                        Observações: ${dados.obs || 'Sem observações'}
+                    `
                 };
 
-                const response = await emailjs.send(
-                    EMAILJS_CONFIG.serviceID,
-                    EMAILJS_CONFIG.templateID,
-                    templateParams
-                );
-
-                console.log("Email enviado:", response);
+                const info = await transporter.sendMail(mailOptions);
+                console.log('✅ Email enviado:', info.response);
                 return { success: true };
+                
             } catch (error) {
-                console.error("Erro email:", error);
-                return { success: false, error: error.text || error.message };
+                console.error('❌ Erro ao enviar email:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // ==========================================================
+        // ENVIAR WHATSAPP (VIA GOOGLE APPS SCRIPT - SEM ABRIR ABA)
+        // ==========================================================
+        async function enviarWhatsApp(dados) {
+            try {
+                // URL do seu Google Apps Script
+                const url = 'https://script.google.com/macros/s/AKfycbzW3B0tF5Yup5kBF7DSnIqrtgrW2CFyW8bVi0Vb3XzYvqrL6spCjjDoC4-fs84lCXJ-Hw/exec';
+                
+                const resposta = await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: dados.nome,
+                        email: dados.email,
+                        setor: dados.setor || '',
+                        data: dados.data,
+                        hora: dados.hora,
+                        obs: dados.obs || ''
+                    })
+                });
+
+                console.log('✅ WhatsApp enviado via script!');
+                return { success: true };
+                
+            } catch (error) {
+                console.error('❌ Erro WhatsApp:', error);
+                return { success: false, error: error.message };
             }
         }
 
@@ -1213,33 +1252,36 @@
             };
 
             btnConfirmarReserva.disabled = true;
-            btnConfirmarReserva.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            btnConfirmarReserva.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
             try {
+                // 1. Salvar no Firestore
                 const result = await salvarReserva(dados);
-                
-                if (!result.success) {
-                    throw new Error(result.error);
-                }
+                if (!result.success) throw new Error(result.error);
 
+                // 2. Enviar Email
                 const emailResult = await enviarEmail(dados);
                 
-                if (!emailResult.success) {
-                    showToast('✅ Reserva salva! Falha no email: ' + emailResult.error, 'error');
+                // 3. Enviar WhatsApp (sem abrir aba)
+                const whatsappResult = await enviarWhatsApp(dados);
+
+                // 4. Feedback para o usuário
+                if (emailResult.success && whatsappResult.success) {
+                    showToast('✅ Reserva confirmada! Email e WhatsApp enviados.', 'success');
+                } else if (emailResult.success) {
+                    showToast('✅ Reserva confirmada! Email enviado (WhatsApp pode ter falhado).', 'warning');
                 } else {
-                    showToast('✅ Reserva confirmada! Email enviado.', 'success');
+                    showToast('⚠️ Reserva salva! WhatsApp enviado (email pode ter falhado).', 'warning');
                 }
 
+                // 5. Limpar e fechar
                 formReserva.reset();
                 modal.classList.remove('active');
-                
                 horarioBtns.forEach(b => b.classList.remove('selecionado'));
                 horarioSelecionado = null;
-                
-                // A lista atualiza automaticamente via onSnapshot
 
             } catch (error) {
-                console.error("Erro:", error);
+                console.error('❌ Erro:', error);
                 showToast('❌ Erro ao fazer reserva: ' + error.message, 'error');
             } finally {
                 btnConfirmarReserva.disabled = false;
@@ -1269,7 +1311,6 @@
         carregarReservas();
         
         console.log('✅ DPIPS - Sistema de Reservas carregado!');
-        console.log('📧 EmailJS:', EMAILJS_CONFIG.publicKey ? '✅ Configurado' : '❌');
         console.log('🔥 Firebase:', firebaseConfig.projectId);
     </script>
 
