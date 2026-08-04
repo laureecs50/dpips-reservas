@@ -1,0 +1,23 @@
+📁 Firestore Database
+├── 📄 atalhos/               (Links e botões)
+│   ├── {id}
+│   │   ├── titulo: "Adesão RN + Saudável"
+│   │   ├── icone: "fa-handshake"
+│   │   ├── link: "https://..."
+│   │   ├── ativo: true
+│   │   └── ordem: 1
+│   └── ...
+├── 📄 noticias/              (Notícias do site)
+│   ├── {id}
+│   │   ├── titulo: "Novo sistema..."
+│   │   ├── conteudo: "Texto da notícia"
+│   │   ├── data: "01/08/2026"
+│   │   └── ativo: true
+│   └── ...
+└── 📄 configuracoes/         (Configurações gerais)
+    ├── site/
+    │   ├── titulo: "DPIPS - Sala de Reservas"
+    │   ├── whatsapp: "558432322578"
+    │   ├── telefone: "(84) 3232-2579"
+    │   └── email: "dpips.dpips@gmail.com"
+    └── ...

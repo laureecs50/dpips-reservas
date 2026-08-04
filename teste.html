@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Firebase</title>
+</head>
+<body>
+    <h1>Teste de Conexão</h1>
+    <button onclick="testarFirebase()">Testar Firebase</button>
+    <div id="resultado"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmn0YA71iVXgyvb8627D-rv1ZVtkCHLF4",
+            authDomain: "agenda-dpips.firebaseapp.com",
+            projectId: "agenda-dpips",
+            storageBucket: "agenda-dpips.firebasestorage.app",
+            messagingSenderId: "10526411332",
+            appId: "1:10526411332:web:77ef3682a408448bf18a11"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.testarFirebase = async function() {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = '⏳ Testando...';
+            
+            try {
+                const docRef = await addDoc(collection(db, "reservas"), {
+                    nome: "Teste",
+                    email: "teste@teste.com",
+                    data: "2026-08-04",
+                    hora: "10:00",
+                    criadoEm: serverTimestamp()
+                });
+                resultado.innerHTML = `✅ Sucesso! ID da reserva: ${docRef.id}`;
+                console.log("✅ Reserva de teste salva!");
+            } catch (error) {
+                resultado.innerHTML = `❌ Erro: ${error.message}`;
+                console.error("❌ Erro detalhado:", error);
+            }
+        };
+    </script>
+</body>
+</html>

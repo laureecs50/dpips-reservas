@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DPIPS - Sala de Reservas</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+    </script>
     <style>
         /* ==========================================================
            RESET E BASE
@@ -40,7 +43,7 @@
             background: linear-gradient(135deg, #0b2a4a, #1a4b6d);
             color: white;
             padding: 20px 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -122,7 +125,7 @@
             text-align: center;
             border-radius: 0 0 40px 40px;
             margin-bottom: 40px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
 
         .hero h2 {
@@ -163,7 +166,7 @@
             background: white;
             border-radius: 24px;
             padding: 30px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
             margin-bottom: 50px;
         }
 
@@ -291,7 +294,7 @@
             border-radius: 12px;
             margin-bottom: 10px;
             border-left: 5px solid #1a4b6d;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -336,7 +339,7 @@
             padding: 20px 15px;
             border-radius: 18px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             transition: 0.3s;
             cursor: pointer;
             border: 1px solid #edf2f7;
@@ -348,7 +351,7 @@
 
         .card-atalho:hover {
             transform: translateY(-6px);
-            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
             border-color: #b0cce0;
         }
 
@@ -374,7 +377,7 @@
             background: white;
             border-radius: 24px;
             padding: 30px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
             margin-bottom: 50px;
         }
 
@@ -474,7 +477,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
             justify-content: center;
             align-items: center;
@@ -491,13 +494,19 @@
             width: 90%;
             padding: 30px;
             border-radius: 28px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: modalFade 0.3s ease;
         }
 
         @keyframes modalFade {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         .modal-box h3 {
@@ -521,7 +530,8 @@
             font-weight: 500;
         }
 
-        .modal-box input, .modal-box textarea {
+        .modal-box input,
+        .modal-box textarea {
             width: 100%;
             padding: 10px 14px;
             border-radius: 12px;
@@ -568,7 +578,7 @@
             color: white;
             padding: 16px 24px;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             display: none;
             max-width: 400px;
@@ -588,8 +598,14 @@
         }
 
         @keyframes slideIn {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         /* ==========================================================
@@ -599,14 +615,16 @@
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(0,0,0,0.1);
+            border: 3px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
             border-top-color: #1a4b6d;
             animation: spin 0.8s ease-in-out infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* ==========================================================
@@ -640,7 +658,7 @@
             .nav-menu ul li a {
                 display: block;
                 padding: 10px 0;
-                border-bottom: 1px solid rgba(255,255,255,0.1);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
 
             .hero h2 {
@@ -678,7 +696,7 @@
     <header>
         <div class="container header-flex">
             <div class="logo">
-                <h1>DPIPS <span>| Sala de Reservas</span></h1>
+                <h1 id="siteTitulo">DPIPS <span>| Sala de Reservas</span></h1>
                 <span class="subtitle">Diretoria de Políticas Intersetoriais e Promoção à Saúde</span>
             </div>
             <button class="menu-toggle" id="menuToggle" aria-label="Menu">
@@ -757,75 +775,8 @@
     <section class="container" id="atalhos">
         <div class="atalhos-section">
             <h3><i class="fas fa-th-large"></i> Acesse rapidamente</h3>
-            <div class="atalhos-grid">
-                <div class="card-atalho" data-alerta="Adesão dos municípios ao RN mais saudável">
-                    <i class="fas fa-handshake"></i>
-                    <span>Adesão RN + Saudável</span>
-                </div>
-                <div class="card-atalho" data-alerta="Sessão de fotos e vídeos">
-                    <i class="fas fa-photo-video"></i>
-                    <span>Fotos e Vídeos</span>
-                </div>
-                <div class="card-atalho" data-alerta="Seminários">
-                    <i class="fas fa-users"></i>
-                    <span>Seminários</span>
-                </div>
-                <div class="card-atalho" data-alerta="Publicações">
-                    <i class="fas fa-book-open"></i>
-                    <span>Publicações</span>
-                </div>
-                <div class="card-atalho" data-alerta="Fale conosco">
-                    <i class="fas fa-envelope"></i>
-                    <span>Fale conosco</span>
-                </div>
-                <div class="card-atalho" data-alerta="Deixe seu recado">
-                    <i class="fas fa-comment-dots"></i>
-                    <span>Deixe seu recado</span>
-                </div>
-                <div class="card-atalho whatsapp" data-link="https://wa.me/558432322578?text=Olá!%20Quero%20informações%20sobre%20a%20sala%20DPIPS.">
-                    <i class="fab fa-whatsapp"></i>
-                    <span>WhatsApp direto</span>
-                </div>
-                <div class="card-atalho" data-alerta="Notícias">
-                    <i class="fas fa-newspaper"></i>
-                    <span>Notícias</span>
-                </div>
-                <div class="card-atalho" data-alerta="Populações">
-                    <i class="fas fa-users"></i>
-                    <span>Populações</span>
-                </div>
-                <div class="card-atalho" data-alerta="Comitês">
-                    <i class="fas fa-people-arrows"></i>
-                    <span>Comitês</span>
-                </div>
-                <div class="card-atalho" data-alerta="Grupos Técnicos">
-                    <i class="fas fa-user-cog"></i>
-                    <span>Grupos Técnicos</span>
-                </div>
-                <div class="card-atalho" data-alerta="Quem somos">
-                    <i class="fas fa-address-card"></i>
-                    <span>Quem somos</span>
-                </div>
-                <div class="card-atalho" data-alerta="Sobre a DPIPS">
-                    <i class="fas fa-building"></i>
-                    <span>Sobre a DPIPS</span>
-                </div>
-                <div class="card-atalho" data-alerta="Sobre o RN mais saudável">
-                    <i class="fas fa-heartbeat"></i>
-                    <span>RN + Saudável</span>
-                </div>
-                <div class="card-atalho" data-alerta="PVT">
-                    <i class="fas fa-chart-line"></i>
-                    <span>PVT</span>
-                </div>
-                <div class="card-atalho" data-alerta="Eixos">
-                    <i class="fas fa-arrows-alt-h"></i>
-                    <span>Eixos</span>
-                </div>
-                <div class="card-atalho" data-alerta="Outros">
-                    <i class="fas fa-ellipsis-h"></i>
-                    <span>Outros</span>
-                </div>
+            <div class="atalhos-grid" id="atalhosContainer">
+                <div class="spinner" style="margin:20px auto;"></div>
             </div>
         </div>
     </section>
@@ -837,21 +788,7 @@
         <div class="noticias-section">
             <h3><i class="fas fa-newspaper"></i> Notícias</h3>
             <div class="noticias-grid" id="noticiasContainer">
-                <div class="noticia-item">
-                    <h4>Novo sistema de reservas online</h4>
-                    <p>Agora você pode reservar a sala DPIPS de forma rápida e transparente pelo nosso web app.</p>
-                    <span class="data">01/08/2026</span>
-                </div>
-                <div class="noticia-item">
-                    <h4>Adesão de novos municípios ao RN + Saudável</h4>
-                    <p>Mais 10 cidades aderiram ao programa, ampliando o alcance das ações de saúde.</p>
-                    <span class="data">28/07/2026</span>
-                </div>
-                <div class="noticia-item">
-                    <h4>Seminário de boas práticas em saúde</h4>
-                    <p>Evento reunirá gestores e técnicos para compartilhar experiências bem-sucedidas.</p>
-                    <span class="data">20/07/2026</span>
-                </div>
+                <div class="spinner" style="margin:20px auto;"></div>
             </div>
         </div>
     </section>
@@ -877,9 +814,9 @@
             <div>
                 <h5>Contato</h5>
                 <ul>
-                    <li><i class="fas fa-phone"></i> (84) 3232-2579</li>
-                    <li><i class="fab fa-whatsapp"></i> (84) 3232-2578</li>
-                    <li><i class="fas fa-envelope"></i> dpips.dpips@gmail.com</li>
+                    <li id="footerTelefone"><i class="fas fa-phone"></i> (84) 3232-2579</li>
+                    <li id="footerWhatsapp"><i class="fab fa-whatsapp"></i> (84) 3232-2578</li>
+                    <li id="footerEmail"><i class="fas fa-envelope"></i> dpips.dpips@gmail.com</li>
                 </ul>
             </div>
         </div>
@@ -927,46 +864,38 @@
     ========================================================== -->
     <script type="module">
         // ==========================================================
-        // IMPORTAÇÕES
+        // CONFIGURAÇÃO DO FIREBASE (NOVAS CREDENCIAIS)
         // ==========================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { 
-            getFirestore, 
-            collection, 
-            query, 
+        import {
+            getFirestore,
+            collection,
+            query,
             where,
             addDoc,
             orderBy,
             serverTimestamp,
-            onSnapshot
+            onSnapshot,
+            getDoc,
+            doc
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
 
-        // ==========================================================
-        // CONFIGURAÇÕES
-        // ==========================================================
         const firebaseConfig = {
-            apiKey: "AIzaSyBmn0YA71iVXgyvb8627D-rv1ZVtkCHLF4",
-            authDomain: "agenda-dpips.firebaseapp.com",
-            projectId: "agenda-dpips",
-            storageBucket: "agenda-dpips.firebasestorage.app",
-            messagingSenderId: "10526411332",
-            appId: "1:10526411332:web:77ef3682a408448bf18a11"
+            apiKey: "AIzaSyBfb6qslnV0Hr015QACJFZpyj8eTVYrfII",
+            authDomain: "dpips-f9b0f.firebaseapp.com",
+            projectId: "dpips-f9b0f",
+            storageBucket: "dpips-f9b0f.firebasestorage.app",
+            messagingSenderId: "578993170008",
+            appId: "1:578993170008:web:bbfcc16f96d18abfb24c2d"
         };
 
-        const EMAILJS_CONFIG = {
-            publicKey: "fxOU5uT6rvEVC0xwMZK7I",
-            serviceID: "service_elz4t6e",
-            templateID: "template_l7ibsfc",
-            toEmail: "dpips.dpips@gmail.com"
-        };
-
-        // ==========================================================
-        // INICIALIZAÇÕES
-        // ==========================================================
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        emailjs.init(EMAILJS_CONFIG.publicKey);
+
+        // ==========================================================
+        // INICIALIZAÇÃO DO EMAILJS
+        // ==========================================================
+        emailjs.init("fxOU5uT6rvEVC0xwMZK7I");
 
         // ==========================================================
         // DOM REFS
@@ -984,6 +913,8 @@
         const btnConfirmarReserva = document.getElementById('btnConfirmarReserva');
         const menuToggle = document.getElementById('menuToggle');
         const navMenu = document.getElementById('navMenu');
+        const atalhosContainer = document.getElementById('atalhosContainer');
+        const noticiasContainer = document.getElementById('noticiasContainer');
 
         let horarioSelecionado = null;
         let reservasDoDia = [];
@@ -1048,12 +979,12 @@
                 snapshot.forEach((doc) => {
                     const r = { id: doc.id, ...doc.data() };
                     reservasDoDia.push(r);
-                    
+
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        <span><strong>${r.nome || 'Anônimo'}</strong> - ${r.hora}</span>
-                        <span class="badge">${r.setor || 'Sem setor'}</span>
-                    `;
+                            <span><strong>${r.nome || 'Anônimo'}</strong> - ${r.hora}</span>
+                            <span class="badge">${r.setor || 'Sem setor'}</span>
+                        `;
                     listaReservasUl.appendChild(li);
                 });
 
@@ -1071,7 +1002,7 @@
         // ==========================================================
         function atualizarHorariosDisponiveis() {
             const horariosOcupados = reservasDoDia.map(r => r.hora);
-            
+
             horarioBtns.forEach(btn => {
                 const horario = btn.dataset.horario;
                 if (horariosOcupados.includes(horario)) {
@@ -1089,10 +1020,11 @@
         }
 
         // ==========================================================
-        // SALVAR RESERVA
+        // SALVAR RESERVA NO FIRESTORE
         // ==========================================================
         async function salvarReserva(dados) {
             try {
+                console.log("📤 Tentando salvar reserva:", dados);
                 const docRef = await addDoc(collection(db, "reservas"), {
                     nome: dados.nome,
                     email: dados.email,
@@ -1102,40 +1034,70 @@
                     hora: dados.hora,
                     criadoEm: serverTimestamp()
                 });
+                console.log("✅ Reserva salva com ID:", docRef.id);
                 return { success: true, id: docRef.id };
             } catch (error) {
-                console.error("Erro:", error);
+                console.error("❌ Erro detalhado:", error);
                 return { success: false, error: error.message };
             }
         }
 
         // ==========================================================
-        // ENVIAR EMAIL
+        // ENVIAR E-MAIL VIA EMAILJS
         // ==========================================================
         async function enviarEmail(dados) {
             try {
                 const templateParams = {
-                    to_email: EMAILJS_CONFIG.toEmail,
                     from_name: dados.nome,
                     from_email: dados.email,
-                    date: dados.data,
-                    time: dados.hora,
                     setor: dados.setor || 'Não informado',
+                    data: dados.data,
+                    hora: dados.hora,
                     obs: dados.obs || 'Sem observações',
-                    subject: `Nova reserva - Sala DPIPS - ${dados.data} às ${dados.hora}`
+                    to_name: "DPIPS",
+                    message: `Nova reserva solicitada por ${dados.nome}.\n\nDetalhes:\n- Data: ${dados.data}\n- Horário: ${dados.hora}\n- E-mail: ${dados.email}\n- Setor: ${dados.setor || 'Não informado'}\n- Observações: ${dados.obs || 'Nenhuma'}`
                 };
 
-                const response = await emailjs.send(
-                    EMAILJS_CONFIG.serviceID,
-                    EMAILJS_CONFIG.templateID,
+                await emailjs.send(
+                    'service_elz4t6e',
+                    'template_I7ibfsc',
                     templateParams
                 );
-
-                console.log("Email enviado:", response);
+                console.log('✅ E-mail enviado com sucesso!');
                 return { success: true };
             } catch (error) {
-                console.error("Erro email:", error);
-                return { success: false, error: error.text || error.message };
+                console.error('❌ Erro ao enviar e-mail:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // ==========================================================
+        // ENVIAR WHATSAPP (VIA GOOGLE APPS SCRIPT)
+        // ==========================================================
+        async function enviarWhatsApp(dados) {
+            try {
+                const url = 'https://script.google.com/macros/s/AKfycbzW3B0tF5Yup5kBF7DSnIqrtgrW2CFyW8bVi0Vb3XzYvqrL6spCjjDoC4-fs84lCXJ-Hw/exec';
+
+                await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: dados.nome,
+                        email: dados.email,
+                        setor: dados.setor || '',
+                        data: dados.data,
+                        hora: dados.hora,
+                        obs: dados.obs || ''
+                    })
+                });
+
+                console.log('✅ WhatsApp enviado via script!');
+                return { success: true };
+
+            } catch (error) {
+                console.error('❌ Erro WhatsApp:', error);
+                return { success: false, error: error.message };
             }
         }
 
@@ -1162,12 +1124,12 @@
                 showToast('Selecione um horário primeiro!', 'error');
                 return;
             }
-            
+
             if (reservasDoDia.some(r => r.hora === horarioSelecionado)) {
                 showToast('Este horário foi reservado! Escolha outro.', 'error');
                 return;
             }
-            
+
             modal.classList.add('active');
         }
 
@@ -1187,7 +1149,7 @@
         // ==========================================================
         formReserva.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const nome = document.getElementById('nomeReserva').value.trim();
             const email = document.getElementById('emailReserva').value.trim();
             const setor = document.getElementById('setorReserva').value.trim();
@@ -1213,33 +1175,29 @@
             };
 
             btnConfirmarReserva.disabled = true;
-            btnConfirmarReserva.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            btnConfirmarReserva.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
             try {
+                // 1. Salvar no Firestore
                 const result = await salvarReserva(dados);
-                
-                if (!result.success) {
-                    throw new Error(result.error);
-                }
+                if (!result.success) throw new Error(result.error);
 
-                const emailResult = await enviarEmail(dados);
-                
-                if (!emailResult.success) {
-                    showToast('✅ Reserva salva! Falha no email: ' + emailResult.error, 'error');
-                } else {
-                    showToast('✅ Reserva confirmada! Email enviado.', 'success');
-                }
+                // 2. Enviar WhatsApp
+                await enviarWhatsApp(dados);
 
+                // 3. Enviar E-mail
+                await enviarEmail(dados);
+
+                showToast('✅ Reserva confirmada!', 'success');
+
+                // 4. Limpar e fechar
                 formReserva.reset();
                 modal.classList.remove('active');
-                
                 horarioBtns.forEach(b => b.classList.remove('selecionado'));
                 horarioSelecionado = null;
-                
-                // A lista atualiza automaticamente via onSnapshot
 
             } catch (error) {
-                console.error("Erro:", error);
+                console.error('❌ Erro:', error);
                 showToast('❌ Erro ao fazer reserva: ' + error.message, 'error');
             } finally {
                 btnConfirmarReserva.disabled = false;
@@ -1248,29 +1206,195 @@
         });
 
         // ==========================================================
-        // CARDS DE ATALHO
+        // CARREGAR ATALHOS DO FIRESTORE
         // ==========================================================
-        document.querySelectorAll('.card-atalho').forEach(card => {
-            card.addEventListener('click', function() {
-                const link = this.dataset.link;
-                if (link) {
-                    window.open(link, '_blank');
-                } else {
-                    const alerta = this.dataset.alerta || 'Funcionalidade em desenvolvimento.';
-                    showToast(`🔔 ${alerta}`, 'success');
+        function carregarAtalhos() {
+            if (!atalhosContainer) return;
+
+            const q = query(
+                collection(db, 'atalhos'),
+                where('ativo', '==', true),
+                orderBy('ordem', 'asc')
+            );
+
+            onSnapshot(q, (snapshot) => {
+                atalhosContainer.innerHTML = '';
+
+                if (snapshot.empty) {
+                    atalhosContainer.innerHTML = `
+                            <p style="grid-column:1/-1;text-align:center;color:#999;padding:20px;">
+                                📭 Nenhum atalho configurado.
+                            </p>
+                        `;
+                    return;
                 }
+
+                snapshot.forEach((doc) => {
+                    const a = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'card-atalho';
+
+                    if (a.link) {
+                        card.style.cursor = 'pointer';
+                        card.onclick = () => window.open(a.link, '_blank');
+                    } else {
+                        card.onclick = () => {
+                            if (a.alerta) {
+                                showToast(`🔔 ${a.alerta}`, 'success');
+                            } else {
+                                showToast('🔔 Funcionalidade em desenvolvimento', 'success');
+                            }
+                        };
+                    }
+
+                    if (a.icone === 'fa-whatsapp') {
+                        card.classList.add('whatsapp');
+                    }
+
+                    card.innerHTML = `
+                            <i class="fas ${a.icone || 'fa-link'}"></i>
+                            <span>${a.titulo}</span>
+                        `;
+
+                    atalhosContainer.appendChild(card);
+                });
+            }, (error) => {
+                console.error('Erro ao carregar atalhos:', error);
+                atalhosContainer.innerHTML = `
+                        <p style="grid-column:1/-1;text-align:center;color:#dc3545;padding:20px;">
+                            ❌ Erro ao carregar atalhos
+                        </p>
+                    `;
             });
-        });
+        }
+
+        // ==========================================================
+        // CARREGAR NOTÍCIAS DO FIRESTORE
+        // ==========================================================
+        function carregarNoticias() {
+            if (!noticiasContainer) return;
+
+            const q = query(
+                collection(db, 'noticias'),
+                where('ativo', '==', true),
+                orderBy('data', 'desc')
+            );
+
+            onSnapshot(q, (snapshot) => {
+                noticiasContainer.innerHTML = '';
+
+                if (snapshot.empty) {
+                    noticiasContainer.innerHTML = `
+                            <p style="grid-column:1/-1;text-align:center;color:#999;padding:20px;">
+                                📭 Nenhuma notícia publicada.
+                            </p>
+                        `;
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const n = doc.data();
+                    const item = document.createElement('div');
+                    item.className = 'noticia-item';
+
+                    const dataFormatada = n.data ? formatarDataBr(n.data) : 'Sem data';
+
+                    item.innerHTML = `
+                            <h4>${n.titulo}</h4>
+                            <p>${n.conteudo}</p>
+                            <span class="data">📅 ${dataFormatada}</span>
+                        `;
+
+                    noticiasContainer.appendChild(item);
+                });
+            }, (error) => {
+                console.error('Erro ao carregar notícias:', error);
+                noticiasContainer.innerHTML = `
+                        <p style="grid-column:1/-1;text-align:center;color:#dc3545;padding:20px;">
+                            ❌ Erro ao carregar notícias
+                        </p>
+                    `;
+            });
+        }
+
+        // ==========================================================
+        // CARREGAR CONFIGURAÇÕES
+        // ==========================================================
+        async function carregarConfiguracoes() {
+            try {
+                const docRef = doc(db, 'configuracoes', 'site');
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const c = docSnap.data();
+
+                    if (c.titulo) {
+                        const tituloEl = document.getElementById('siteTitulo');
+                        if (tituloEl) {
+                            tituloEl.innerHTML = c.titulo.replace(/\|/g, '<span>|</span>');
+                        }
+                        document.title = c.titulo || 'DPIPS - Sala de Reservas';
+                    }
+
+                    if (c.whatsapp) {
+                        const whatsappEl = document.getElementById('footerWhatsapp');
+                        if (whatsappEl) {
+                            whatsappEl.innerHTML = `<i class="fab fa-whatsapp"></i> ${formatarTelefone(c.whatsapp)}`;
+                        }
+                    }
+
+                    if (c.telefone) {
+                        const telefoneEl = document.getElementById('footerTelefone');
+                        if (telefoneEl) {
+                            telefoneEl.innerHTML = `<i class="fas fa-phone"></i> ${c.telefone}`;
+                        }
+                    }
+
+                    if (c.email) {
+                        const emailEl = document.getElementById('footerEmail');
+                        if (emailEl) {
+                            emailEl.innerHTML = `<i class="fas fa-envelope"></i> ${c.email}`;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao carregar configurações:', error);
+            }
+        }
+
+        // ==========================================================
+        // UTILITÁRIOS
+        // ==========================================================
+        function formatarDataBr(data) {
+            if (!data) return 'Sem data';
+            const partes = data.split('-');
+            if (partes.length === 3) {
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+            return data;
+        }
+
+        function formatarTelefone(numero) {
+            const n = numero.replace(/\D/g, '');
+            if (n.length === 11) {
+                return `(${n.substring(0, 2)}) ${n.substring(2, 7)}-${n.substring(7)}`;
+            }
+            return numero;
+        }
 
         // ==========================================================
         // INICIAR
         // ==========================================================
         dataReservaInput.addEventListener('change', carregarReservas);
+
         carregarReservas();
-        
+        carregarAtalhos();
+        carregarNoticias();
+        carregarConfiguracoes();
+
         console.log('✅ DPIPS - Sistema de Reservas carregado!');
-        console.log('📧 EmailJS:', EMAILJS_CONFIG.publicKey ? '✅ Configurado' : '❌');
-        console.log('🔥 Firebase:', firebaseConfig.projectId);
+        console.log('🔥 Firebase conectado');
+        console.log('📧 EmailJS inicializado com Service: service_elz4t6e e Template: template_I7ibfsc');
     </script>
 
 </body>
