@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DPIPS - Sala de Reservas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <!-- EmailJS SDK -->
+    <!-- EmailJS SDK (opcional, mantido) -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
     </script>
     <style>
@@ -860,11 +860,11 @@
     <div id="toast" class="toast"></div>
 
     <!-- ==========================================================
-    JAVASCRIPT - FIREBASE + EMAILJS
+    JAVASCRIPT - FIREBASE + NODEMAILER + WHATSAPP + BOTÕES INTERATIVOS (UNIFICADO)
     ========================================================== -->
     <script type="module">
         // ==========================================================
-        // CONFIGURAÇÃO DO FIREBASE (NOVAS CREDENCIAIS)
+        // CONFIGURAÇÃO DO FIREBASE
         // ==========================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import {
@@ -877,7 +877,8 @@
             serverTimestamp,
             onSnapshot,
             getDoc,
-            doc
+            doc,
+            deleteDoc      // ADICIONADO
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -891,11 +892,6 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        // ==========================================================
-        // INICIALIZAÇÃO DO EMAILJS
-        // ==========================================================
-        emailjs.init("fxOU5uT6rvEVC0xwMZK7I");
 
         // ==========================================================
         // DOM REFS
@@ -950,7 +946,7 @@
         setDefaultDate();
 
         // ==========================================================
-        // CARREGAR RESERVAS DO DIA (TEMPO REAL)
+        // CARREGAR RESERVAS DO DIA (COM BOTÃO CANCELAR E ESTATÍSTICAS)
         // ==========================================================
         function carregarReservas() {
             const dataSelecionada = dataReservaInput.value;
@@ -970,21 +966,44 @@
                 reservasDoDia = [];
                 listaReservasUl.innerHTML = '';
 
+                // Atualiza estatísticas
+                const totalReservas = document.getElementById('totalReservas');
+                const totalDisponiveis = document.getElementById('totalDisponiveis');
+                if (totalReservas) totalReservas.textContent = snapshot.size;
+                if (totalDisponiveis) totalDisponiveis.textContent = horarioBtns.length - snapshot.size;
+
                 if (snapshot.empty) {
                     listaReservasUl.innerHTML = '<li class="sem-reservas">Nenhuma reserva para esta data.</li>';
                     atualizarHorariosDisponiveis();
                     return;
                 }
 
-                snapshot.forEach((doc) => {
-                    const r = { id: doc.id, ...doc.data() };
+                snapshot.forEach((docSnap) => {
+                    const r = { id: docSnap.id, ...docSnap.data() };
                     reservasDoDia.push(r);
 
                     const li = document.createElement('li');
                     li.innerHTML = `
-                            <span><strong>${r.nome || 'Anônimo'}</strong> - ${r.hora}</span>
+                        <span><strong>${r.nome || 'Anônimo'}</strong> - ${r.hora}</span>
+                        <div>
                             <span class="badge">${r.setor || 'Sem setor'}</span>
-                        `;
+                            <button class="btn-cancelar" data-id="${r.id}" 
+                                    style="background:#dc3545;color:white;border:none;padding:4px 12px;border-radius:20px;margin-left:8px;cursor:pointer;font-size:0.8rem;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    li.querySelector('.btn-cancelar').addEventListener('click', async (e) => {
+                        const id = e.currentTarget.dataset.id;
+                        if (confirm('❌ Cancelar esta reserva?')) {
+                            try {
+                                await deleteDoc(doc(db, 'reservas', id));
+                                showToast('✅ Reserva cancelada!', 'success');
+                            } catch (error) {
+                                showToast('❌ Erro ao cancelar', 'error');
+                            }
+                        }
+                    });
                     listaReservasUl.appendChild(li);
                 });
 
@@ -1024,7 +1043,6 @@
         // ==========================================================
         async function salvarReserva(dados) {
             try {
-                console.log("📤 Tentando salvar reserva:", dados);
                 const docRef = await addDoc(collection(db, "reservas"), {
                     nome: dados.nome,
                     email: dados.email,
@@ -1034,39 +1052,43 @@
                     hora: dados.hora,
                     criadoEm: serverTimestamp()
                 });
-                console.log("✅ Reserva salva com ID:", docRef.id);
                 return { success: true, id: docRef.id };
             } catch (error) {
-                console.error("❌ Erro detalhado:", error);
                 return { success: false, error: error.message };
             }
         }
 
         // ==========================================================
-        // ENVIAR E-MAIL VIA EMAILJS
+        // ENVIAR EMAIL (NODEMAILER)
         // ==========================================================
         async function enviarEmail(dados) {
             try {
-                const templateParams = {
-                    from_name: dados.nome,
-                    from_email: dados.email,
-                    setor: dados.setor || 'Não informado',
-                    data: dados.data,
-                    hora: dados.hora,
-                    obs: dados.obs || 'Sem observações',
-                    to_name: "DPIPS",
-                    message: `Nova reserva solicitada por ${dados.nome}.\n\nDetalhes:\n- Data: ${dados.data}\n- Horário: ${dados.hora}\n- E-mail: ${dados.email}\n- Setor: ${dados.setor || 'Não informado'}\n- Observações: ${dados.obs || 'Nenhuma'}`
+                const nodemailerModule = await import('https://cdn.jsdelivr.net/npm/nodemailer@6.9.7/+esm');
+                const SENHA_APP_GMAIL = 'iisl iaef csut ejnh'.replace(/\s/g, '');
+                const transporter = nodemailerModule.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: 'dpips.dpips@gmail.com',
+                        pass: SENHA_APP_GMAIL
+                    }
+                });
+                const mailOptions = {
+                    from: 'dpips.dpips@gmail.com',
+                    to: 'dpips.dpips@gmail.com',
+                    subject: `Nova reserva - Sala DPIPS - ${dados.data} às ${dados.hora}`,
+                    text: `
+                        Nova reserva da sala DPIPS!
+                        Nome: ${dados.nome}
+                        Email: ${dados.email}
+                        Setor: ${dados.setor || 'Não informado'}
+                        Data: ${dados.data}
+                        Hora: ${dados.hora}
+                        Observações: ${dados.obs || 'Sem observações'}
+                    `
                 };
-
-                await emailjs.send(
-                    'service_elz4t6e',
-                    'template_I7ibfsc',
-                    templateParams
-                );
-                console.log('✅ E-mail enviado com sucesso!');
+                await transporter.sendMail(mailOptions);
                 return { success: true };
             } catch (error) {
-                console.error('❌ Erro ao enviar e-mail:', error);
                 return { success: false, error: error.message };
             }
         }
@@ -1077,7 +1099,6 @@
         async function enviarWhatsApp(dados) {
             try {
                 const url = 'https://script.google.com/macros/s/AKfycbzW3B0tF5Yup5kBF7DSnIqrtgrW2CFyW8bVi0Vb3XzYvqrL6spCjjDoC4-fs84lCXJ-Hw/exec';
-
                 await fetch(url, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -1091,12 +1112,8 @@
                         obs: dados.obs || ''
                     })
                 });
-
-                console.log('✅ WhatsApp enviado via script!');
                 return { success: true };
-
             } catch (error) {
-                console.error('❌ Erro WhatsApp:', error);
                 return { success: false, error: error.message };
             }
         }
@@ -1124,12 +1141,10 @@
                 showToast('Selecione um horário primeiro!', 'error');
                 return;
             }
-
             if (reservasDoDia.some(r => r.hora === horarioSelecionado)) {
                 showToast('Este horário foi reservado! Escolha outro.', 'error');
                 return;
             }
-
             modal.classList.add('active');
         }
 
@@ -1159,7 +1174,6 @@
                 showToast('Preencha nome e email!', 'error');
                 return;
             }
-
             if (!email.includes('@')) {
                 showToast('Email inválido!', 'error');
                 return;
@@ -1178,26 +1192,20 @@
             btnConfirmarReserva.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
             try {
-                // 1. Salvar no Firestore
                 const result = await salvarReserva(dados);
                 if (!result.success) throw new Error(result.error);
 
-                // 2. Enviar WhatsApp
                 await enviarWhatsApp(dados);
-
-                // 3. Enviar E-mail
                 await enviarEmail(dados);
 
                 showToast('✅ Reserva confirmada!', 'success');
 
-                // 4. Limpar e fechar
                 formReserva.reset();
                 modal.classList.remove('active');
                 horarioBtns.forEach(b => b.classList.remove('selecionado'));
                 horarioSelecionado = null;
 
             } catch (error) {
-                console.error('❌ Erro:', error);
                 showToast('❌ Erro ao fazer reserva: ' + error.message, 'error');
             } finally {
                 btnConfirmarReserva.disabled = false;
@@ -1210,61 +1218,34 @@
         // ==========================================================
         function carregarAtalhos() {
             if (!atalhosContainer) return;
-
             const q = query(
                 collection(db, 'atalhos'),
                 where('ativo', '==', true),
                 orderBy('ordem', 'asc')
             );
-
             onSnapshot(q, (snapshot) => {
                 atalhosContainer.innerHTML = '';
-
                 if (snapshot.empty) {
-                    atalhosContainer.innerHTML = `
-                            <p style="grid-column:1/-1;text-align:center;color:#999;padding:20px;">
-                                📭 Nenhum atalho configurado.
-                            </p>
-                        `;
+                    atalhosContainer.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#999;padding:20px;">📭 Nenhum atalho configurado.</p>`;
                     return;
                 }
-
                 snapshot.forEach((doc) => {
                     const a = doc.data();
                     const card = document.createElement('div');
                     card.className = 'card-atalho';
-
                     if (a.link) {
                         card.style.cursor = 'pointer';
                         card.onclick = () => window.open(a.link, '_blank');
                     } else {
-                        card.onclick = () => {
-                            if (a.alerta) {
-                                showToast(`🔔 ${a.alerta}`, 'success');
-                            } else {
-                                showToast('🔔 Funcionalidade em desenvolvimento', 'success');
-                            }
-                        };
+                        card.onclick = () => showToast(`🔔 ${a.alerta || 'Funcionalidade em desenvolvimento'}`, 'success');
                     }
-
-                    if (a.icone === 'fa-whatsapp') {
-                        card.classList.add('whatsapp');
-                    }
-
-                    card.innerHTML = `
-                            <i class="fas ${a.icone || 'fa-link'}"></i>
-                            <span>${a.titulo}</span>
-                        `;
-
+                    if (a.icone === 'fa-whatsapp') card.classList.add('whatsapp');
+                    card.innerHTML = `<i class="fas ${a.icone || 'fa-link'}"></i><span>${a.titulo}</span>`;
                     atalhosContainer.appendChild(card);
                 });
             }, (error) => {
                 console.error('Erro ao carregar atalhos:', error);
-                atalhosContainer.innerHTML = `
-                        <p style="grid-column:1/-1;text-align:center;color:#dc3545;padding:20px;">
-                            ❌ Erro ao carregar atalhos
-                        </p>
-                    `;
+                atalhosContainer.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#dc3545;padding:20px;">❌ Erro ao carregar atalhos</p>`;
             });
         }
 
@@ -1273,47 +1254,28 @@
         // ==========================================================
         function carregarNoticias() {
             if (!noticiasContainer) return;
-
             const q = query(
                 collection(db, 'noticias'),
                 where('ativo', '==', true),
                 orderBy('data', 'desc')
             );
-
             onSnapshot(q, (snapshot) => {
                 noticiasContainer.innerHTML = '';
-
                 if (snapshot.empty) {
-                    noticiasContainer.innerHTML = `
-                            <p style="grid-column:1/-1;text-align:center;color:#999;padding:20px;">
-                                📭 Nenhuma notícia publicada.
-                            </p>
-                        `;
+                    noticiasContainer.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#999;padding:20px;">📭 Nenhuma notícia publicada.</p>`;
                     return;
                 }
-
                 snapshot.forEach((doc) => {
                     const n = doc.data();
                     const item = document.createElement('div');
                     item.className = 'noticia-item';
-
                     const dataFormatada = n.data ? formatarDataBr(n.data) : 'Sem data';
-
-                    item.innerHTML = `
-                            <h4>${n.titulo}</h4>
-                            <p>${n.conteudo}</p>
-                            <span class="data">📅 ${dataFormatada}</span>
-                        `;
-
+                    item.innerHTML = `<h4>${n.titulo}</h4><p>${n.conteudo}</p><span class="data">📅 ${dataFormatada}</span>`;
                     noticiasContainer.appendChild(item);
                 });
             }, (error) => {
                 console.error('Erro ao carregar notícias:', error);
-                noticiasContainer.innerHTML = `
-                        <p style="grid-column:1/-1;text-align:center;color:#dc3545;padding:20px;">
-                            ❌ Erro ao carregar notícias
-                        </p>
-                    `;
+                noticiasContainer.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#dc3545;padding:20px;">❌ Erro ao carregar notícias</p>`;
             });
         }
 
@@ -1324,37 +1286,24 @@
             try {
                 const docRef = doc(db, 'configuracoes', 'site');
                 const docSnap = await getDoc(docRef);
-
                 if (docSnap.exists()) {
                     const c = docSnap.data();
-
                     if (c.titulo) {
                         const tituloEl = document.getElementById('siteTitulo');
-                        if (tituloEl) {
-                            tituloEl.innerHTML = c.titulo.replace(/\|/g, '<span>|</span>');
-                        }
+                        if (tituloEl) tituloEl.innerHTML = c.titulo.replace(/\|/g, '<span>|</span>');
                         document.title = c.titulo || 'DPIPS - Sala de Reservas';
                     }
-
                     if (c.whatsapp) {
                         const whatsappEl = document.getElementById('footerWhatsapp');
-                        if (whatsappEl) {
-                            whatsappEl.innerHTML = `<i class="fab fa-whatsapp"></i> ${formatarTelefone(c.whatsapp)}`;
-                        }
+                        if (whatsappEl) whatsappEl.innerHTML = `<i class="fab fa-whatsapp"></i> ${formatarTelefone(c.whatsapp)}`;
                     }
-
                     if (c.telefone) {
                         const telefoneEl = document.getElementById('footerTelefone');
-                        if (telefoneEl) {
-                            telefoneEl.innerHTML = `<i class="fas fa-phone"></i> ${c.telefone}`;
-                        }
+                        if (telefoneEl) telefoneEl.innerHTML = `<i class="fas fa-phone"></i> ${c.telefone}`;
                     }
-
                     if (c.email) {
                         const emailEl = document.getElementById('footerEmail');
-                        if (emailEl) {
-                            emailEl.innerHTML = `<i class="fas fa-envelope"></i> ${c.email}`;
-                        }
+                        if (emailEl) emailEl.innerHTML = `<i class="fas fa-envelope"></i> ${c.email}`;
                     }
                 }
             } catch (error) {
@@ -1368,19 +1317,260 @@
         function formatarDataBr(data) {
             if (!data) return 'Sem data';
             const partes = data.split('-');
-            if (partes.length === 3) {
-                return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            }
+            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
             return data;
         }
 
         function formatarTelefone(numero) {
             const n = numero.replace(/\D/g, '');
-            if (n.length === 11) {
-                return `(${n.substring(0, 2)}) ${n.substring(2, 7)}-${n.substring(7)}`;
-            }
+            if (n.length === 11) return `(${n.substring(0, 2)}) ${n.substring(2, 7)}-${n.substring(7)}`;
             return numero;
         }
+
+        // ==========================================================
+        // FUNÇÕES DOS BOTÕES INTERATIVOS (ADICIONADOS AQUI)
+        // ==========================================================
+
+        // 1. FILTRO POR SETOR
+        function adicionarFiltroSetor() {
+            const lista = document.querySelector('.lista-reservas');
+            if (!lista) return;
+            if (document.getElementById('filtroSetor')) return;
+            const filtroHTML = `
+                <div style="margin-bottom:10px;">
+                    <select id="filtroSetor" style="padding:8px;border-radius:8px;border:1px solid #ccd7e6;width:100%;">
+                        <option value="todos">📋 Todos os setores</option>
+                        <option value="DPIPS">DPIPS</option>
+                        <option value="SESAP">SESAP</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+            `;
+            lista.insertAdjacentHTML('afterbegin', filtroHTML);
+            document.getElementById('filtroSetor').addEventListener('change', (e) => {
+                const setor = e.target.value;
+                const items = listaReservasUl.querySelectorAll('li');
+                items.forEach(li => {
+                    if (li.classList.contains('sem-reservas')) return;
+                    const badge = li.querySelector('.badge');
+                    if (badge) {
+                        li.style.display = setor === 'todos' || badge.textContent === setor ? '' : 'none';
+                    }
+                });
+            });
+        }
+        adicionarFiltroSetor();
+
+        // 2. ESTATÍSTICAS
+        function adicionarEstatisticas() {
+            const lista = document.querySelector('.lista-reservas');
+            if (!lista) return;
+            if (document.getElementById('estatisticas')) return;
+            const statsHTML = `
+                <div id="estatisticas" style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
+                    <div style="background:#e3f2fd;padding:8px 16px;border-radius:12px;flex:1;min-width:80px;">
+                        <strong>Total:</strong> <span id="totalReservas">0</span>
+                    </div>
+                    <div style="background:#e8f5e9;padding:8px 16px;border-radius:12px;flex:1;min-width:80px;">
+                        <strong>Disponíveis:</strong> <span id="totalDisponiveis">0</span>
+                    </div>
+                </div>
+            `;
+            lista.insertAdjacentHTML('afterbegin', statsHTML);
+        }
+        adicionarEstatisticas();
+
+        // 3. BOTÃO COPIAR LINK
+        function adicionarBotaoCopiarLink() {
+            const modalBox = document.querySelector('.modal-box');
+            if (!modalBox) return;
+            if (document.getElementById('btnCopiarLink')) return;
+            const form = modalBox.querySelector('form');
+            if (!form) return;
+            const btnHTML = `
+                <button type="button" id="btnCopiarLink" class="btn-confirmar" style="background:#6c757d;margin-top:10px;">
+                    <i class="fas fa-link"></i> Copiar link da reserva
+                </button>
+            `;
+            form.insertAdjacentHTML('afterend', btnHTML);
+            document.getElementById('btnCopiarLink').addEventListener('click', () => {
+                if (!horarioSelecionado) {
+                    showToast('⚠️ Selecione um horário primeiro', 'error');
+                    return;
+                }
+                const link = `${window.location.origin}?data=${dataReservaInput.value}&hora=${horarioSelecionado}`;
+                navigator.clipboard.writeText(link).then(() => {
+                    showToast('✅ Link copiado!', 'success');
+                }).catch(() => {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = link;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showToast('✅ Link copiado!', 'success');
+                });
+            });
+        }
+        adicionarBotaoCopiarLink();
+
+        // 4. BOTÃO IMPRIMIR
+        function adicionarBotaoImprimir() {
+            const agenda = document.querySelector('.agenda-section');
+            if (!agenda) return;
+            if (document.getElementById('btnImprimir')) return;
+            const btnHTML = `
+                <button id="btnImprimir" style="background:#6c757d;color:white;border:none;padding:8px 20px;border-radius:30px;cursor:pointer;float:right;margin-top:-50px;">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+            `;
+            agenda.querySelector('h3').insertAdjacentHTML('afterend', btnHTML);
+            document.getElementById('btnImprimir').addEventListener('click', () => window.print());
+        }
+        adicionarBotaoImprimir();
+
+        // 5. BOTÃO RECARREGAR
+        function adicionarBotaoRecarregar() {
+            const agenda = document.querySelector('.agenda-section');
+            if (!agenda) return;
+            if (document.getElementById('btnRecarregar')) return;
+            const btnHTML = `
+                <button id="btnRecarregar" style="background:#28a745;color:white;border:none;padding:8px 20px;border-radius:30px;cursor:pointer;margin-left:10px;">
+                    <i class="fas fa-sync"></i> Atualizar
+                </button>
+            `;
+            agenda.querySelector('h3').insertAdjacentHTML('afterend', btnHTML);
+            document.getElementById('btnRecarregar').addEventListener('click', () => {
+                carregarReservas();
+                showToast('🔄 Dados atualizados!', 'success');
+            });
+        }
+        adicionarBotaoRecarregar();
+
+        // 6. NOTIFICAÇÕES
+        function adicionarBotaoNotificacao() {
+            const header = document.querySelector('.header-flex');
+            if (!header) return;
+            if (document.getElementById('btnNotificar')) return;
+            const btnHTML = `
+                <button id="btnNotificar" style="background:#ff9800;color:white;border:none;padding:6px 16px;border-radius:30px;cursor:pointer;font-size:0.8rem;margin-left:10px;">
+                    <i class="fas fa-bell"></i> Notificar
+                </button>
+            `;
+            header.querySelector('.menu-toggle').insertAdjacentHTML('beforebegin', btnHTML);
+            document.getElementById('btnNotificar').addEventListener('click', async () => {
+                if ('Notification' in window) {
+                    if (Notification.permission === 'granted') {
+                        new Notification('📅 DPIPS - Sala de Reservas', {
+                            body: `🔔 ${reservasDoDia.length} reservas hoje!`,
+                            icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%231a4b6d"/%3E%3Ctext x="50" y="65" font-size="50" text-anchor="middle" fill="white"%3E📅%3C/text%3E%3C/svg%3E'
+                        });
+                    } else {
+                        const permissao = await Notification.requestPermission();
+                        if (permissao === 'granted') showToast('✅ Notificações ativadas!', 'success');
+                        else showToast('⚠️ Permissão negada', 'error');
+                    }
+                } else {
+                    showToast('⚠️ Seu navegador não suporta notificações', 'error');
+                }
+            });
+        }
+        adicionarBotaoNotificacao();
+
+        // 7. TEMA ESCURO/CLARO
+        function adicionarBotaoTema() {
+            const header = document.querySelector('.header-flex');
+            if (!header) return;
+            if (document.getElementById('btnTema')) return;
+            const btnHTML = `
+                <button id="btnTema" style="background:#6c757d;color:white;border:none;padding:6px 16px;border-radius:30px;cursor:pointer;font-size:0.8rem;">
+                    <i class="fas fa-moon"></i>
+                </button>
+            `;
+            header.querySelector('.menu-toggle').insertAdjacentHTML('beforebegin', btnHTML);
+            let temaEscuro = false;
+            document.getElementById('btnTema').addEventListener('click', () => {
+                temaEscuro = !temaEscuro;
+                document.body.style.background = temaEscuro ? '#1a1a2e' : '#f4f7fc';
+                document.body.style.color = temaEscuro ? '#e0e0e0' : '#1e2a3a';
+                document.querySelectorAll('.agenda-section, .noticias-section, .atalhos-section').forEach(el => {
+                    el.style.background = temaEscuro ? '#2d2d44' : 'white';
+                });
+                document.querySelectorAll('.calendario, .lista-reservas').forEach(el => {
+                    el.style.background = temaEscuro ? '#3d3d5c' : '#f9fbfd';
+                });
+                document.querySelectorAll('.noticia-item, .card-atalho').forEach(el => {
+                    el.style.background = temaEscuro ? '#3d3d5c' : '#f9fbfd';
+                });
+                document.querySelectorAll('.horario-btn').forEach(el => {
+                    el.style.background = temaEscuro ? '#4a4a6a' : '#eef3f9';
+                });
+                document.querySelector('#btnTema i').className = temaEscuro ? 'fas fa-sun' : 'fas fa-moon';
+            });
+        }
+        adicionarBotaoTema();
+
+        // 8. COMPARTILHAR
+        function adicionarBotaoCompartilhar() {
+            const modalBox = document.querySelector('.modal-box');
+            if (!modalBox) return;
+            if (document.getElementById('btnCompartilhar')) return;
+            const form = modalBox.querySelector('form');
+            if (!form) return;
+            const btnHTML = `
+                <button type="button" id="btnCompartilhar" style="background:#1da1f2;color:white;border:none;padding:8px 20px;border-radius:30px;cursor:pointer;margin-top:10px;width:100%;">
+                    <i class="fas fa-share-alt"></i> Compartilhar
+                </button>
+            `;
+            form.insertAdjacentHTML('afterend', btnHTML);
+            document.getElementById('btnCompartilhar').addEventListener('click', () => {
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'DPIPS - Sala de Reservas',
+                        text: `📅 Reserve a sala DPIPS! Data: ${dataReservaInput.value}`,
+                        url: window.location.href
+                    }).catch(() => {});
+                } else {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        showToast('📋 Link copiado!', 'success');
+                    });
+                }
+            });
+        }
+        adicionarBotaoCompartilhar();
+
+        // 9. EXPORTAR CSV
+        function adicionarBotaoExportar() {
+            const agenda = document.querySelector('.agenda-section');
+            if (!agenda) return;
+            if (document.getElementById('btnExportar')) return;
+            const btnHTML = `
+                <button id="btnExportar" style="background:#17a2b8;color:white;border:none;padding:8px 20px;border-radius:30px;cursor:pointer;margin-left:10px;">
+                    <i class="fas fa-file-csv"></i> Exportar CSV
+                </button>
+            `;
+            agenda.querySelector('h3').insertAdjacentHTML('afterend', btnHTML);
+            document.getElementById('btnExportar').addEventListener('click', () => {
+                if (reservasDoDia.length === 0) {
+                    showToast('⚠️ Sem reservas para exportar', 'error');
+                    return;
+                }
+                let csv = 'Nome,Email,Setor,Data,Hora,Observações\n';
+                reservasDoDia.forEach(r => {
+                    csv += `${r.nome},${r.email},${r.setor || ''},${r.data},${r.hora},${r.obs || ''}\n`;
+                });
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `reservas_${dataReservaInput.value}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+                showToast('✅ CSV exportado!', 'success');
+            });
+        }
+        adicionarBotaoExportar();
 
         // ==========================================================
         // INICIAR
@@ -1392,10 +1582,7 @@
         carregarNoticias();
         carregarConfiguracoes();
 
-        console.log('✅ DPIPS - Sistema de Reservas carregado!');
-        console.log('🔥 Firebase conectado');
-        console.log('📧 EmailJS inicializado com Service: service_elz4t6e e Template: template_I7ibfsc');
+        console.log('✅ DPIPS - Sistema de Reservas carregado com TODOS os botões interativos!');
     </script>
-
 </body>
 </html>
