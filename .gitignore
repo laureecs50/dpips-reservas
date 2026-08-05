@@ -3,3 +3,13 @@ node_modules/
 .DS_Store
 # Local Netlify folder
 .netlify
+# Banco de dados local
+database/
+*.db
+*.sqlite
+*.sqlite3
+
+# Outros arquivos comuns
+.env
+__pycache__/
+.venv/
