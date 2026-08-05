@@ -5,12 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DPIPS - Sala de Reservas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <!-- EmailJS SDK (opcional, mantido) -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
-    </script>
     <style>
         /* ==========================================================
-           RESET E BASE
+           RESET E BASE (mesmo de antes)
            ========================================================== */
         * {
             margin: 0;
@@ -176,6 +173,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .agenda-section h3 i {
@@ -860,15 +858,14 @@
     <div id="toast" class="toast"></div>
 
     <!-- ==========================================================
-    JAVASCRIPT - FIREBASE + NODEMAILER + WHATSAPP + BOTÕES INTERATIVOS (UNIFICADO)
+    JAVASCRIPT - Importa db do firebase-config.js
     ========================================================== -->
     <script type="module">
-        // ==========================================================
-        // CONFIGURAÇÃO DO FIREBASE
-        // ==========================================================
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        // Importa o Firestore do arquivo de configuração
+        import { db } from './firebase-config.js';
+
+        // Importa funções necessárias do Firestore (via CDN)
         import {
-            getFirestore,
             collection,
             query,
             where,
@@ -878,23 +875,11 @@
             onSnapshot,
             getDoc,
             doc,
-            deleteDoc      // ADICIONADO
+            deleteDoc
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfb6qslnV0Hr015QACJFZpyj8eTVYrfII",
-            authDomain: "dpips-f9b0f.firebaseapp.com",
-            projectId: "dpips-f9b0f",
-            storageBucket: "dpips-f9b0f.firebasestorage.app",
-            messagingSenderId: "578993170008",
-            appId: "1:578993170008:web:bbfcc16f96d18abfb24c2d"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
         // ==========================================================
-        // DOM REFS
+        // DOM REFS (mesmo de antes)
         // ==========================================================
         const dataReservaInput = document.getElementById('dataReserva');
         const horarioBtns = document.querySelectorAll('.horario-btn');
@@ -1328,7 +1313,7 @@
         }
 
         // ==========================================================
-        // FUNÇÕES DOS BOTÕES INTERATIVOS (ADICIONADOS AQUI)
+        // FUNÇÕES DOS BOTÕES INTERATIVOS
         // ==========================================================
 
         // 1. FILTRO POR SETOR
