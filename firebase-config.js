@@ -1,18 +1,19 @@
 // firebase-config.js
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+// Configuração única do Firebase para todo o projeto
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBfb6qslnV0Hr015QACJFZpyj8eTVYrfII",
   authDomain: "dpips-f9b0f.firebaseapp.com",
   projectId: "dpips-f9b0f",
-  storageBucket: "dpips-f9b0f.firebasestorage.app",
+  storageBucket: "dpips-f9b0f.appspot.com",
   messagingSenderId: "578993170008",
   appId: "1:578993170008:web:bbfcc16f96d18abfb24c2d"
 };
 
-// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export default app;

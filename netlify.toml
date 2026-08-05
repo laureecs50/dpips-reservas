@@ -1,0 +1,19 @@
+# Configuração de build e deploy para Netlify
+
+[build]
+  publish = "."                    # Pasta pública (raiz do projeto)
+
+# Redirecionamentos (a ordem importa: específico primeiro, geral depois)
+
+# 1. Rota administrativa (acesso ao painel via /admin)
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200                     # 200 = redirecionamento silencioso (mantém a URL)
+
+# 2. Fallback para SPA (Single Page Application)
+# Qualquer outra URL vai para o index.html (página principal do usuário)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
