@@ -84,7 +84,7 @@
         <div id="loginScreen" class="login-box">
             <h2><i class="fas fa-user-shield"></i> Acesso Admin</h2>
             <p style="color:var(--text-light); margin-bottom:20px;">Digite suas credenciais</p>
-            <input type="email" id="loginEmail" placeholder="E-mail" value="dpips.dpips@gmail.com">
+            <input type="email" id="loginEmail" placeholder="E-mail" value="admin@dpips.com">
             <input type="password" id="loginSenha" placeholder="Senha" value="dpips2024">
             <button id="btnLogin">Entrar</button>
             <div id="loginErro" class="erro"></div>
@@ -175,11 +175,11 @@
 
     <div id="toast" class="toast"></div>
 
+    <!-- Firebase: APENAS Firestore (sem Auth) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script>
-        // ===== Firebase Config (unificada) =====
+        // ===== Firebase Config (APENAS FIRESTORE) =====
         const firebaseConfig = {
             apiKey: "AIzaSyBfb6qslnV0Hr015QACJFZpyj8eTVYrfII",
             authDomain: "dpips-f9b0f.firebaseapp.com",
@@ -190,7 +190,9 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const auth = firebase.auth();
+
+        // ===== SENHA FIXA (sem Firebase Auth) =====
+        const SENHA_ADMIN = "dpips2024";
 
         // ===== DOM REFS =====
         const loginScreen = document.getElementById('loginScreen');
@@ -225,48 +227,51 @@
         const btnCancelarEdicaoNoticia = document.getElementById('btnCancelarEdicaoNoticia');
         const estatisticasContainer = document.getElementById('estatisticasContainer');
 
+        // ===== TOAST =====
         function showToast(msg, type = 'success') {
             toast.textContent = msg;
             toast.className = `toast ${type} show`;
             setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-        // ===== LOGIN =====
+        // ===== LOGIN COM SENHA FIXA =====
         btnLogin.addEventListener('click', () => {
             const email = loginEmail.value.trim();
             const senha = loginSenha.value.trim();
-            if (!email || !senha) { loginErro.textContent = 'Preencha e-mail e senha.'; return; }
+            
+            if (!email || !senha) {
+                loginErro.textContent = 'Preencha e-mail e senha.';
+                return;
+            }
+            
             loginErro.textContent = '';
             btnLogin.disabled = true;
             btnLogin.innerHTML = '<div class="spinner"></div> Entrando...';
 
-            auth.signInWithEmailAndPassword(email, senha)
-                .then(() => {
-                    loginScreen.style.display = 'none';
-                    adminPanel.style.display = 'block';
-                    carregarDados();
-                    showToast('Bem-vindo, Admin!');
-                })
-                .catch(err => {
-                    loginErro.textContent = 'Erro: ' + err.message;
-                    btnLogin.disabled = false;
-                    btnLogin.innerHTML = 'Entrar';
-                });
-        });
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
+            // Verifica a senha
+            if (senha === SENHA_ADMIN) {
                 loginScreen.style.display = 'none';
                 adminPanel.style.display = 'block';
                 carregarDados();
+                showToast('Bem-vindo, Admin!');
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = 'Entrar';
             } else {
-                loginScreen.style.display = 'block';
-                adminPanel.style.display = 'none';
+                loginErro.textContent = '❌ Senha incorreta!';
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = 'Entrar';
             }
         });
 
-        btnSair.addEventListener('click', () => auth.signOut().then(() => showToast('Desconectado.')));
-        loginSenha.addEventListener('keypress', e => { if (e.key === 'Enter') btnLogin.click(); });
+        // ===== SAIR =====
+        btnSair.addEventListener('click', () => {
+            loginScreen.style.display = 'block';
+            adminPanel.style.display = 'none';
+            // Limpa os campos
+            loginSenha.value = '';
+            loginErro.textContent = '';
+            showToast('Desconectado.');
+        });
 
         // ===== ABAS =====
         document.querySelectorAll('.tabs button').forEach(btn => {
@@ -539,12 +544,28 @@
             if (!noticiaData.value) noticiaData.value = hoje;
         }
 
-        if (auth.currentUser) {
+        // Verifica se já está logado (persistência via sessionStorage)
+        if (sessionStorage.getItem('admin_logado') === 'true') {
             loginScreen.style.display = 'none';
             adminPanel.style.display = 'block';
             carregarDados();
         }
-        console.log('✅ Admin DPIPS carregado!');
+
+        // Salva estado do login
+        btnLogin.addEventListener('click', () => {
+            // ... (código do login) ...
+            if (senha === SENHA_ADMIN) {
+                sessionStorage.setItem('admin_logado', 'true');
+                // ...
+            }
+        });
+
+        btnSair.addEventListener('click', () => {
+            sessionStorage.removeItem('admin_logado');
+            // ...
+        });
+
+        console.log('✅ Admin DPIPS carregado (login com senha fixa)');
     </script>
 </body>
 </html>
