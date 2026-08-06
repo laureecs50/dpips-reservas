@@ -250,6 +250,7 @@
 
             // Verifica a senha
             if (senha === SENHA_ADMIN) {
+                sessionStorage.setItem('admin_logado', 'true');
                 loginScreen.style.display = 'none';
                 adminPanel.style.display = 'block';
                 carregarDados();
@@ -265,9 +266,9 @@
 
         // ===== SAIR =====
         btnSair.addEventListener('click', () => {
+            sessionStorage.removeItem('admin_logado');
             loginScreen.style.display = 'block';
             adminPanel.style.display = 'none';
-            // Limpa os campos
             loginSenha.value = '';
             loginErro.textContent = '';
             showToast('Desconectado.');
@@ -544,28 +545,14 @@
             if (!noticiaData.value) noticiaData.value = hoje;
         }
 
-        // Verifica se já está logado (persistência via sessionStorage)
+        // ===== VERIFICA SESSÃO =====
         if (sessionStorage.getItem('admin_logado') === 'true') {
             loginScreen.style.display = 'none';
             adminPanel.style.display = 'block';
             carregarDados();
         }
 
-        // Salva estado do login
-        btnLogin.addEventListener('click', () => {
-            // ... (código do login) ...
-            if (senha === SENHA_ADMIN) {
-                sessionStorage.setItem('admin_logado', 'true');
-                // ...
-            }
-        });
-
-        btnSair.addEventListener('click', () => {
-            sessionStorage.removeItem('admin_logado');
-            // ...
-        });
-
-        console.log('✅ Admin DPIPS carregado (login com senha fixa)');
+        console.log('✅ Admin DPIPS - Login com senha fixa (Firebase Auth removido)');
     </script>
 </body>
 </html>
