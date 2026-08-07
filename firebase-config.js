@@ -16,4 +16,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-export default app;
+export default app;rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true; // ⚠️ LIBERA TUDO - SÓ PARA TESTE!
+    }
+  }
+}

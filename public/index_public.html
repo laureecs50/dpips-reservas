@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
@@ -34,6 +34,17 @@
             top:0; z-index:100;
         }
         .header-flex { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+        .logo { display: flex; flex-direction: column; }
+        .logo .slogan { 
+            align-self: flex-end; 
+            font-size: 0.75rem; 
+            font-weight: 300; 
+            letter-spacing: 1px; 
+            color: #D4E6F2; 
+            margin-bottom: 2px; 
+            text-transform: uppercase; 
+            text-align: right;
+        }
         .logo h1 { font-size:1.6rem; font-weight:700; }
         .logo h1 span { font-weight:300; }
         .logo .subtitle { font-size:0.75rem; font-weight:300; color:var(--primary-light); display:block; margin-top:2px; }
@@ -314,6 +325,9 @@
     <header>
         <div class="container header-flex">
             <div class="logo">
+                <!-- SLOGAN DA DPIPS NO TOPO À DIREITA -->
+                <div class="slogan">🌐 Trabalhando pela Promoção da saúde no Rio Grande do Norte</div>
+                
                 <h1 id="siteTitulo">DPIPS <span>| Sala de Reservas</span></h1>
                 <span class="subtitle">Diretoria de Políticas Intersetoriais e Promoção à Saúde</span>
             </div>
@@ -576,29 +590,6 @@
             }
         }
 
-        // ===== ENVIAR EMAIL (opcional – comentado por segurança) =====
-        /*
-        async function enviarEmail(dados) {
-            try {
-                const nodemailerModule = await import('https://cdn.jsdelivr.net/npm/nodemailer@6.9.7/+esm');
-                const SENHA_APP_GMAIL = 'iisl iaef csut ejnh'.replace(/\s/g, '');
-                const transporter = nodemailerModule.createTransport({
-                    service: 'gmail',
-                    auth: { user: 'dpips.dpips@gmail.com', pass: SENHA_APP_GMAIL }
-                });
-                await transporter.sendMail({
-                    from: 'dpips.dpips@gmail.com',
-                    to: 'dpips.dpips@gmail.com',
-                    subject: `Nova reserva - Sala DPIPS - ${dados.data} às ${dados.hora}`,
-                    text: `Nova reserva!\nNome: ${dados.nome}\nEmail: ${dados.email}\nSetor: ${dados.setor || 'Não informado'}\nData: ${dados.data}\nHora: ${dados.hora}\nObs: ${dados.obs || 'Sem observações'}`
-                });
-                return { success: true };
-            } catch (error) {
-                return { success: false, error: error.message };
-            }
-        }
-        */
-
         // ===== EVENTOS HORÁRIOS =====
         horarioBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -653,7 +644,6 @@
                 const result = await salvarReserva(dados);
                 if (!result.success) throw new Error(result.error);
                 await enviarWhatsApp(dados);
-                // await enviarEmail(dados); // opcional
                 showToast('✅ Reserva confirmada!', 'success');
                 formReserva.reset();
                 modal.classList.remove('active');
@@ -746,8 +736,7 @@
             return n.length === 11 ? `(${n.substring(0,2)}) ${n.substring(2,7)}-${n.substring(7)}` : numero;
         }
 
-        // ===== BOTÕES INTERATIVOS (todos já estão implementados) =====
-        // 1. Filtro por setor
+        // ===== BOTÕES INTERATIVOS =====
         function adicionarFiltroSetor() {
             const lista = document.querySelector('.lista-reservas');
             if (!lista || document.getElementById('filtroSetor')) return;
@@ -775,7 +764,6 @@
         }
         adicionarFiltroSetor();
 
-        // 2. Estatísticas
         function adicionarEstatisticas() {
             const lista = document.querySelector('.lista-reservas');
             if (!lista || document.getElementById('estatisticas')) return;
@@ -793,7 +781,6 @@
         }
         adicionarEstatisticas();
 
-        // 3. Copiar link
         function adicionarBotaoCopiarLink() {
             const modalBox = document.querySelector('.modal-box');
             if (!modalBox || document.getElementById('btnCopiarLink')) return;
@@ -826,7 +813,6 @@
         }
         adicionarBotaoCopiarLink();
 
-        // 4. Imprimir
         function adicionarBotaoImprimir() {
             const agenda = document.querySelector('.agenda-section');
             if (!agenda || document.getElementById('btnImprimir')) return;
@@ -840,7 +826,6 @@
         }
         adicionarBotaoImprimir();
 
-        // 5. Recarregar
         function adicionarBotaoRecarregar() {
             const agenda = document.querySelector('.agenda-section');
             if (!agenda || document.getElementById('btnRecarregar')) return;
@@ -857,7 +842,6 @@
         }
         adicionarBotaoRecarregar();
 
-        // 6. Notificações
         function adicionarBotaoNotificacao() {
             const header = document.querySelector('.header-flex');
             if (!header || document.getElementById('btnNotificar')) return;
@@ -886,7 +870,6 @@
         }
         adicionarBotaoNotificacao();
 
-        // 7. Tema escuro/claro
         function adicionarBotaoTema() {
             const header = document.querySelector('.header-flex');
             if (!header || document.getElementById('btnTema')) return;
@@ -916,7 +899,6 @@
         }
         adicionarBotaoTema();
 
-        // 8. Compartilhar
         function adicionarBotaoCompartilhar() {
             const modalBox = document.querySelector('.modal-box');
             if (!modalBox || document.getElementById('btnCompartilhar')) return;
@@ -944,7 +926,6 @@
         }
         adicionarBotaoCompartilhar();
 
-        // 9. Exportar CSV
         function adicionarBotaoExportar() {
             const agenda = document.querySelector('.agenda-section');
             if (!agenda || document.getElementById('btnExportar')) return;

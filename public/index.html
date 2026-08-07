@@ -85,7 +85,7 @@
             <h2><i class="fas fa-user-shield"></i> Acesso Admin</h2>
             <p style="color:var(--text-light); margin-bottom:20px;">Digite suas credenciais</p>
             <input type="email" id="loginEmail" placeholder="E-mail" value="admin@dpips.com">
-            <input type="password" id="loginSenha" placeholder="Senha" value="dpips2024">
+            <input type="password" id="loginSenha" placeholder="Senha" value="">
             <button id="btnLogin">Entrar</button>
             <div id="loginErro" class="erro"></div>
         </div>
@@ -175,11 +175,12 @@
 
     <div id="toast" class="toast"></div>
 
-    <!-- Firebase: APENAS Firestore (sem Auth) -->
+    <!-- Firebase: Firestore + Auth -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script>
-        // ===== Firebase Config (APENAS FIRESTORE) =====
+        // ===== Firebase Config =====
         const firebaseConfig = {
             apiKey: "AIzaSyBfb6qslnV0Hr015QACJFZpyj8eTVYrfII",
             authDomain: "dpips-f9b0f.firebaseapp.com",
@@ -190,9 +191,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
-        // ===== SENHA FIXA (sem Firebase Auth) =====
-        const SENHA_ADMIN = "dpips2024";
+        const auth = firebase.auth();
 
         // ===== DOM REFS =====
         const loginScreen = document.getElementById('loginScreen');
@@ -234,7 +233,7 @@
             setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-        // ===== LOGIN COM SENHA FIXA =====
+        // ===== LOGIN OFICIAL COM FIREBASE AUTH =====
         btnLogin.addEventListener('click', () => {
             const email = loginEmail.value.trim();
             const senha = loginSenha.value.trim();
@@ -248,24 +247,34 @@
             btnLogin.disabled = true;
             btnLogin.innerHTML = '<div class="spinner"></div> Entrando...';
 
-            // Verifica a senha
-            if (senha === SENHA_ADMIN) {
-                sessionStorage.setItem('admin_logado', 'true');
-                loginScreen.style.display = 'none';
-                adminPanel.style.display = 'block';
-                carregarDados();
-                showToast('Bem-vindo, Admin!');
-                btnLogin.disabled = false;
-                btnLogin.innerHTML = 'Entrar';
-            } else {
-                loginErro.textContent = '❌ Senha incorreta!';
-                btnLogin.disabled = false;
-                btnLogin.innerHTML = 'Entrar';
-            }
+            auth.signInWithEmailAndPassword(email, senha)
+                .then((userCredential) => {
+                    sessionStorage.setItem('admin_logado', 'true');
+                    loginScreen.style.display = 'none';
+                    adminPanel.style.display = 'block';
+                    carregarDados();
+                    showToast('Bem-vindo, Admin!');
+                    btnLogin.disabled = false;
+                    btnLogin.innerHTML = 'Entrar';
+                })
+                .catch((error) => {
+                    if (error.code === 'auth/user-not-found') {
+                        loginErro.textContent = '❌ Usuário não encontrado.';
+                    } else if (error.code === 'auth/wrong-password') {
+                        loginErro.textContent = '❌ Senha incorreta.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        loginErro.textContent = '❌ E-mail inválido.';
+                    } else {
+                        loginErro.textContent = '❌ Erro ao fazer login: ' + error.message;
+                    }
+                    btnLogin.disabled = false;
+                    btnLogin.innerHTML = 'Entrar';
+                });
         });
 
         // ===== SAIR =====
         btnSair.addEventListener('click', () => {
+            auth.signOut();
             sessionStorage.removeItem('admin_logado');
             loginScreen.style.display = 'block';
             adminPanel.style.display = 'none';
@@ -552,7 +561,7 @@
             carregarDados();
         }
 
-        console.log('✅ Admin DPIPS - Login com senha fixa (Firebase Auth removido)');
+        console.log('✅ Admin DPIPS - Login oficial com Firebase Auth');
     </script>
 </body>
 </html>
